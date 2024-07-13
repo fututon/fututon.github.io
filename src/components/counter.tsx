@@ -5,6 +5,7 @@ export default function Counter() {
   const { connected } = useTonConnect();
   const { value, address, sendIncrement } = useCounterContract();
 
+
   return (
     <div className="Container">
           <h3>Counter</h3>
