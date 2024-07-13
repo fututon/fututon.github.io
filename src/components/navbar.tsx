@@ -25,15 +25,18 @@ import {
 } from "@/components/icons";
 import { Logo } from "@/components/icons";
 
+// import { Address } from "ton-core";
+
 
 
 import { useTonConnect } from "@/hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";
 import "@twa-dev/sdk";
-import { TonConnectButton } from "@tonconnect/ui-react";
+import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
 
 export const Navbar = () => {
   const { network } = useTonConnect();
+  const userFriendlyAddress = useTonAddress(false);
 
   const searchInput = (
     <Input
@@ -55,6 +58,8 @@ export const Navbar = () => {
       type="search"
     />
   );
+
+  // console.log(Address)
 
   return (
     <NextUINavbar maxWidth="xl" position="sticky">
@@ -107,6 +112,9 @@ export const Navbar = () => {
         {/*<NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>*/}
         <NavbarItem className="flex">
             <TonConnectButton />
+            {/*{userFriendlyAddress}*/}
+            {/*{userFriendlyAddress && Address.parseRaw(userFriendlyAddress).toString({ bounceable: false })}*/}
+
             {/*<div>*/}
             {/*    {network*/}
             {/*        ? network === CHAIN.MAINNET*/}

@@ -5,22 +5,17 @@ import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 
 import { Divider, Link } from "@nextui-org/react";
-// import Chart from "@/components/chart";
-// import Counter from "@/components/counter";
+import Chart from "@/components/chart";
+import Counter from "@/components/counter";
 
 export default function DocsPage() {
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+      <section className="flex flex-col items-center justify-center gap-4 md:py-10">
           <div className="inline-block max-w-lg text-center justify-center">
               <h1 className={title()}>About</h1>
 
               {/*<Counter />*/}
-
-
-              <Button color="primary">
-                  Button
-              </Button>
 
               <div className="flex flex-row items-center justify-center gap-4">
 
@@ -73,7 +68,7 @@ export default function DocsPage() {
 
               </div>
 
-              {/*<Chart />*/}
+              <Chart />
           </div>
       </section>
     </DefaultLayout>
