@@ -11,11 +11,11 @@ import AboutPage from "@/pages/about";
 function App() {
   return (
     <Routes>
-      <Route element={<IndexPage />} path="/" />
-      <Route element={<DocsPage />} path="/docs" />
-      <Route element={<PricingPage />} path="/pricing" />
-      <Route element={<BlogPage />} path="/blog" />
-      <Route element={<AboutPage />} path="/about" />
+      <Route element={<IndexPage />} path="/futu-web" />
+      <Route element={<DocsPage />} path="/futu-web/docs" />
+      <Route element={<PricingPage />} path="/futu-web/pricing" />
+      <Route element={<BlogPage />} path="/futu-web/blog" />
+      <Route element={<AboutPage />} path="/futu-web/about" />
     </Routes>
   );
 }
