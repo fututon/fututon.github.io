@@ -31,7 +31,6 @@ import { Logo } from "@/components/icons";
 
 import { useTonConnect } from "@/hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";
-import "@twa-dev/sdk";
 import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
 
 export const Navbar = () => {

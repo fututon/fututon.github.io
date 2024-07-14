@@ -7,8 +7,18 @@ import DocsPage from "@/pages/docs";
 import PricingPage from "@/pages/pricing";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
+import {useSwipeBehavior, useSwipeBehaviorRaw} from "@telegram-apps/sdk-react";
+import {useEffect} from "react";
 
 function App() {
+  const swapBehavior = useSwipeBehavior();
+
+  useEffect(() => {
+    try {
+      swapBehavior?.disableVerticalSwipe();
+    } catch (e) {}
+  }, [swapBehavior])
+
   return (
     <Routes>
       <Route element={<IndexPage />} path="/" />
