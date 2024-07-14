@@ -40,7 +40,7 @@ function Chart() {
             container.current.appendChild(script);
         }
       },
-      [1]
+      []
   );
 
   return (

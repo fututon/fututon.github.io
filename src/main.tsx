@@ -18,12 +18,12 @@ const manifestUrl =
 const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
-//
-// import WebApp from '@twa-dev/sdk'
-//
-// console.log(WebApp)
-//
-// window['w'] = WebApp
+
+import WebApp from '@twa-dev/sdk'
+
+console.log(WebApp)
+
+window['w'] = WebApp
 
 
 import eruda from 'eruda';
@@ -37,7 +37,7 @@ import { SDKProvider } from '@telegram-apps/sdk-react';
 
 import { mockTelegramEnv, parseInitData } from '@telegram-apps/sdk';
 
-// if (import.meta.env.DEV) {
+if (import.meta.env.DEV) {
 
   const initDataRaw = new URLSearchParams([
     ['user', JSON.stringify({
@@ -77,14 +77,14 @@ import { mockTelegramEnv, parseInitData } from '@telegram-apps/sdk';
     version: '7.2',
     platform: 'tdesktop',
   });
-// }
+}
 
 
 
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <HashRouter>
+    <BrowserRouter>
         <TonConnectUIProvider manifestUrl={manifestUrl}>
           <SDKProvider acceptCustomStyles debug>
             <QueryClientProvider client={queryClient}>
@@ -94,6 +94,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             </QueryClientProvider>
           </SDKProvider>
         </TonConnectUIProvider>
-    </HashRouter>
+    </BrowserRouter>
   </React.StrictMode>,
 );
