@@ -23,7 +23,7 @@ import WebApp from '@twa-dev/sdk'
 
 console.log(WebApp)
 
-window.w = WebApp
+window['w'] = WebApp
 
 //
 import { SDKProvider } from '@telegram-apps/sdk-react';
