@@ -7,17 +7,29 @@ import DocsPage from "@/pages/docs";
 import PricingPage from "@/pages/pricing";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
-import {useSwipeBehavior, useSwipeBehaviorRaw} from "@telegram-apps/sdk-react";
+import {useSwipeBehavior, useSwipeBehaviorRaw, useViewport} from "@telegram-apps/sdk-react";
 import {useEffect} from "react";
 
 function App() {
   const swapBehavior = useSwipeBehavior();
+  const viewport = useViewport()
 
   useEffect(() => {
+    console.log("swapBehavior")
     try {
+      console.log("swapBehavior disableVerticalSwipe")
       swapBehavior?.disableVerticalSwipe();
     } catch (e) {}
   }, [swapBehavior])
+
+
+  useEffect(() => {
+    console.log("viewport")
+    try {
+      console.log("viewport expand")
+      viewport.expand()
+    } catch (e) {}
+  }, [viewport])
 
   return (
     <Routes>
