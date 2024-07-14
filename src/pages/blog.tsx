@@ -13,6 +13,8 @@ export default function DocsPage() {
 
   const renderChart = () => {
 
+    console.log("RENDER")
+
     return (
       <Chart />
     )
@@ -143,6 +145,7 @@ export default function DocsPage() {
           <Tabs
             aria-label="Options"
             selectedKey={selected}
+            fullWidth
             onSelectionChange={(val) => setSelected(val.toString())}
           >
             <Tab key="bets" title="Bets">
