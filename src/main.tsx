@@ -18,6 +18,13 @@ const manifestUrl =
 const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
+
+import WebApp from '@twa-dev/sdk'
+
+console.log(WebApp)
+
+window.w = WebApp
+
 //
 import { SDKProvider } from '@telegram-apps/sdk-react';
 
