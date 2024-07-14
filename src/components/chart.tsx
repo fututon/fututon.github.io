@@ -54,4 +54,4 @@ function Chart() {
   );
 }
 
-export default memo(Chart);
+export default Chart;

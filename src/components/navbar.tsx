@@ -62,17 +62,17 @@ export const Navbar = () => {
 
   return (
     <NextUINavbar maxWidth="xl" position="sticky">
-      {/*<NavbarContent className="basis-1/5 sm:basis-full" justify="start">*/}
-      {/*  <NavbarBrand className="gap-3 max-w-fit">*/}
-      {/*    <Link*/}
-      {/*      className="flex justify-start items-center gap-1"*/}
-      {/*      color="foreground"*/}
-      {/*      href="/"*/}
-      {/*    >*/}
-      {/*      <Logo />*/}
-      {/*      <p className="font-bold text-inherit">ACME</p>*/}
-      {/*    </Link>*/}
-      {/*  </NavbarBrand>*/}
+      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+        <NavbarBrand className="gap-3 max-w-fit">
+          <Link
+            className="flex justify-start items-center gap-1"
+            color="foreground"
+            href="/"
+          >
+            <Logo />
+            <p className="font-bold text-inherit">ACME</p>
+          </Link>
+        </NavbarBrand>
 
       {/*  /!*<div className="hidden lg:flex gap-4 justify-start ml-2">*!/*/}
       {/*  /!*  {siteConfig.navItems.map((item) => (*!/*/}
@@ -90,7 +90,7 @@ export const Navbar = () => {
       {/*  /!*    </NavbarItem>*!/*/}
       {/*  /!*  ))}*!/*/}
       {/*  /!*</div>*!/*/}
-      {/*</NavbarContent>*/}
+      </NavbarContent>
 
       <NavbarContent
         // className="hidden sm:flex basis-1/5 sm:basis-full"
@@ -138,7 +138,7 @@ export const Navbar = () => {
         {/*<Link isExternal href={siteConfig.links.github}>*/}
         {/*  <GithubIcon className="text-default-500" />*/}
         {/*</Link>*/}
-        <ThemeSwitch />
+        {/*<ThemeSwitch />*/}
         <NavbarMenuToggle />
       </NavbarContent>
 

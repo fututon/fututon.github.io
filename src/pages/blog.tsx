@@ -1,15 +1,25 @@
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
 
-import React, {useState} from "react";
-import {Tabs, Tab, Card, CardBody, CardHeader} from "@nextui-org/react";
+import React, {useMemo, useState} from "react";
+import {Tabs, Tab, Card, CardBody, CardHeader, Divider} from "@nextui-org/react";
 import Chart from "@/components/chart.tsx";
 import Carousel from "react-multi-carousel";
 import {Image} from "@nextui-org/image";
+import {Button} from "@nextui-org/button";
 
 export default function DocsPage() {
   const [selected, setSelected] = useState("bets");
   let CarouselElement = null;
+
+
+  const MemoChart = useMemo(() => {
+
+    console.log('MEMO')
+
+    // Это ваш компонент или элемент, который вы хотите рендерить и кэшировать
+    return <Chart />;
+  }, []);
 
   const renderChart = () => {
 
@@ -17,6 +27,41 @@ export default function DocsPage() {
 
     return (
       <Chart />
+    )
+  }
+
+  const renderCard = () => {
+    return (
+      <div className="p-1">
+        <Card
+          fullWidth={true}
+
+          >
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Live</h4>
+          </CardHeader>
+          <Divider/>
+          <CardBody className="overflow-visible py-2 flex flex-col items-center">
+
+            <div>
+              UP 2x
+            </div>
+
+            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full">
+              <p className="text-tiny uppercase font-bold">Prize pool: 300 TON</p>
+              <Button color="success">LONG</Button>
+              <Button color="danger">SHORT</Button>
+            </div>
+
+            <div>
+              DOWN 2x
+            </div>
+
+          </CardBody>
+
+        </Card>
+      </div>
+
     )
   }
 
@@ -34,12 +79,12 @@ export default function DocsPage() {
       tablet: {
         breakpoint: { max: 1024, min: 464 },
         items: 1,
-        partialVisibilityGutter: 30,
+        partialVisibilityGutter: 40,
       },
       mobile: {
         breakpoint: { max: 464, min: 0 },
         items: 1,
-        partialVisibilityGutter: 30
+        partialVisibilityGutter: 20
       }
     };
 
@@ -54,81 +99,12 @@ export default function DocsPage() {
           centerMode={true}
           focusOnSelect={true}
         >
-          <Card className="py-4 m-1">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <p className="text-tiny uppercase font-bold">Daily Mix</p>
-              <small className="text-default-500">12 Tracks</small>
-              <h4 className="font-bold text-large">Frontend Radio</h4>
-            </CardHeader>
-            <CardBody className="overflow-visible py-2">
-              <Image
-                alt="Card background"
-                className="object-cover rounded-xl"
-                src="https://nextui.org/images/hero-card-complete.jpeg"
-                width={270}
-              />
-            </CardBody>
-          </Card>
-          <Card className="py-4 m-1">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <p className="text-tiny uppercase font-bold">Daily Mix</p>
-              <small className="text-default-500">12 Tracks</small>
-              <h4 className="font-bold text-large">Frontend Radio</h4>
-            </CardHeader>
-            <CardBody className="overflow-visible py-2">
-              <Image
-                alt="Card background"
-                className="object-cover rounded-xl"
-                src="https://nextui.org/images/hero-card-complete.jpeg"
-                width={270}
-              />
-            </CardBody>
-          </Card>
-          <Card className="py-4 m-1">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <p className="text-tiny uppercase font-bold">Daily Mix</p>
-              <small className="text-default-500">12 Tracks</small>
-              <h4 className="font-bold text-large">Frontend Radio</h4>
-            </CardHeader>
-            <CardBody className="overflow-visible py-2">
-              <Image
-                alt="Card background"
-                className="object-cover rounded-xl"
-                src="https://nextui.org/images/hero-card-complete.jpeg"
-                width={270}
-              />
-            </CardBody>
-          </Card>
-          <Card className="py-4 m-1">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <p className="text-tiny uppercase font-bold">Daily Mix</p>
-              <small className="text-default-500">12 Tracks</small>
-              <h4 className="font-bold text-large">Frontend Radio</h4>
-            </CardHeader>
-            <CardBody className="overflow-visible py-2">
-              <Image
-                alt="Card background"
-                className="object-cover rounded-xl"
-                src="https://nextui.org/images/hero-card-complete.jpeg"
-                width={270}
-              />
-            </CardBody>
-          </Card>
-          <Card className="py-4 m-1">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <p className="text-tiny uppercase font-bold">Daily Mix</p>
-              <small className="text-default-500">12 Tracks</small>
-              <h4 className="font-bold text-large">Frontend Radio</h4>
-            </CardHeader>
-            <CardBody className="overflow-visible py-2">
-              <Image
-                alt="Card background"
-                className="object-cover rounded-xl"
-                src="https://nextui.org/images/hero-card-complete.jpeg"
-                width={270}
-              />
-            </CardBody>
-          </Card>
+          {renderCard()}
+          {renderCard()}
+          {renderCard()}
+          {renderCard()}
+          {renderCard()}
+          {renderCard()}
         </Carousel>
       </div>
 
@@ -139,22 +115,14 @@ export default function DocsPage() {
 
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="w-full text-center justify-center">
+      <section className="flex flex-col items-center justify-center gap-4">
+        <div className="w-full flex flex-col gap-1">
 
-          <Tabs
-            aria-label="Options"
-            selectedKey={selected}
-            fullWidth
-            onSelectionChange={(val) => setSelected(val.toString())}
-          >
-            <Tab key="bets" title="Bets">
-              {renderCarousel()}
-            </Tab>
-            <Tab key="chart" title="Chart">
-              {renderChart()}
-            </Tab>
-          </Tabs>
+
+          {renderCarousel()}
+
+          {MemoChart}
+
         </div>
       </section>
     </DefaultLayout>
