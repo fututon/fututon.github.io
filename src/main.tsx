@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, HashRouter } from "react-router-dom";
 
 import App from "./App.tsx";
 import { Provider } from "./provider.tsx";
@@ -84,7 +84,7 @@ mockTelegramEnv({
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
         <TonConnectUIProvider manifestUrl={manifestUrl}>
           <SDKProvider acceptCustomStyles debug>
             <QueryClientProvider client={queryClient}>
@@ -94,6 +94,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             </QueryClientProvider>
           </SDKProvider>
         </TonConnectUIProvider>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
 );
