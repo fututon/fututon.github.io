@@ -6,7 +6,7 @@ import {Image} from "@nextui-org/image";
 
 import {Divider, Link} from "@nextui-org/react";
 import Chart from "@/components/chart";
-import Counter from "@/components/counter";
+import PredictRound from "@/components/PredictRound";
 
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
@@ -147,9 +147,9 @@ export default function DocsPage() {
         <div className="max-w-full text-center justify-center">
           <h1 className={title()}>About</h1>
 
-          {/*<Counter />*/}
+          <PredictRound />
 
-            {renderCarousel()}
+            {/*{renderCarousel()}*/}
 
           {/*<div className="flex flex-row items-center justify-center gap-4">*/}
 
@@ -202,7 +202,7 @@ export default function DocsPage() {
 
           {/*</div>*/}
 
-          <Chart/>
+          {/*<Chart/>*/}
         </div>
       </section>
     </DefaultLayout>
