@@ -1,0 +1,40 @@
+PredictRound
+
+    state
+        not start
+        betting
+        bets stop
+        started
+        finished
+
+    widthdraw prize
+
+    get_round_info
+       стейт
+       сумма ставок
+       upSum
+       downSum
+
+
+
+
+    get_player_info(address)
+        betDirection up|down
+        betAmount сумма ствки
+        isWin выиграл ли
+
+
+
+
+
+----
+1) OP Deploy
+
+
+2) Ставка
+    добавить в массив бетс
+        адресс, сумма, напреваление
+
+    get_address_info
+        инфа о ставке
+            найти ставку по адрессу

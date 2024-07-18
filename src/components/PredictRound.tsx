@@ -13,6 +13,11 @@ export default function PredictRound() {
   return (
     <div className="Container">
       <h3>Counter</h3>
+
+      <div>
+        <b>Wallet balance</b>
+      </div>
+
       <div>
         <b>Address</b>
         <span>{predictRoundContract.address}</span>

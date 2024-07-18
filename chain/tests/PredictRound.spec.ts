@@ -31,7 +31,11 @@ describe('PredictRound', () => {
 
         deployer = await blockchain.treasury('deployer');
 
+        console.log(deployer.address)
+
         const deployResult = await predictRound.sendDeploy(deployer.getSender(), toNano('0.05'));
+
+        // console.log(deployResult)
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
@@ -82,5 +86,21 @@ describe('PredictRound', () => {
 
             expect(counterAfter).toBe(counterBefore + increaseBy);
         }
+    });
+
+    it('lol', async () => {
+        const wallet = await blockchain.treasury('wallet');
+        const balance = await wallet.getBalance();
+        console.log('Balane', balance);
+
+        const result = await predictRound.sendTest(wallet.getSender());
+        console.log(result)
+
+
+        const owner = await predictRound.getOwner();
+        console.log(owner)
+
+
+
     });
 });

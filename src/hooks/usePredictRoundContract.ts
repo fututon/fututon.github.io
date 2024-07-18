@@ -40,8 +40,8 @@ export function usePredictRoundContract() {
 
   return {
     address: contract?.address.toString(),
-    upSum: isUpSumFetching ? null : fromNano(upSumValue),
-    downSum: isDownSumFetching ? null : fromNano(downSumValue),
+    upSum: upSumValue ? fromNano(upSumValue) : null,
+    downSum: downSumValue ? fromNano(downSumValue) : null,
 
     sendPlaceUp: (value) => {
       return contract?.sendPlaceUp(sender, {

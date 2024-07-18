@@ -1,20 +1,32 @@
 #include "imports/stdlib.fc";
 
+(int) tlen (tuple t) asm "TLEN";
+forall X -> (tuple, X) ~tpop (tuple t) asm "TPOP";
+
 const op::deploy = 0;
 const op::withdraw = 1;
 const op::place_up = 2;
 const op::place_down = 3;
+const op::test = 4;
 
+global int deployed;
+global slice owner_address;
 global int round_id;
 global int up_sum;
 global int down_sum;
 
+global cell bids;
+
+
 () load_data() impure {
     var ds = get_data().begin_parse();
 
+    deployed = ds~load_uint(32);
+    owner_address = ds~load_msg_addr();
     round_id = ds~load_uint(32);
     up_sum = ds~load_coins();
     down_sum = ds~load_coins();
+    bids = ds~load_dict();
 
     ds.end_parse();
 }
@@ -22,9 +34,12 @@ global int down_sum;
 () save_data() impure {
     set_data(
         begin_cell()
+            .store_uint(deployed, 32)
+            .store_slice(owner_address)
             .store_uint(round_id, 32)
             .store_coins(up_sum)
             .store_coins(down_sum)
+            .store_dict(bids)
             .end_cell()
     );
 }
@@ -43,27 +58,67 @@ global int down_sum;
     ;;
 
     slice sender_address = cs~load_msg_addr();
-
-    load_data(); ;; here we populate the storage variables
-
     int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
     int query_id = in_msg_body~load_uint(64); ;; also by convention, the next 64 bits contain the "query id", although this is not always the case
 
     ;; MESSAGES
 
     if (op == op::deploy) {
-        ;; TODO: Ставим что задеплоен
-        ;; TODO: ставим овнера
+        ~strdump("DEPLOY");
+
+        ;; Загружаем флаг деплоя
+        var ds = get_data().begin_parse();
+        deployed = ds~load_uint(32);
+        throw_if(100, deployed);
+
+        deployed = 1;
+        owner_address = sender_address;
+        round_id = 0;
+        up_sum = 0;
+        down_sum = 0;
+        bids = new_dict();
+
+        save_data();
         return ();
     }
 
+    load_data(); ;; here we populate the storage variables
+
+    if (op == op::test) {
+        ~strdump("TEST DUMP");
+
+        bids = new_dict();
+
+        cell c = begin_cell()
+            .store_slice("0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j"a)
+            .store_uint(12, 32)
+            .end_cell();
+
+        bids~udict_set(256, 0, c.begin_parse());
+
+        (int key, slice val, int flag) = bids.udict_get_min?(256);
+        while (flag) {
+            ;; do something with pair key->val
+
+            ~strdump("BJH");
+            ~dump(key);
+
+            slice address = val~load_msg_addr();
+            int betAmount = val~load_uint(32);
+
+            ~dump(address);
+            ~dump(betAmount);
+
+            (key, val, flag) = bids.udict_get_next?(256, key);
+        }
+    }
+
     if (op == op::withdraw) {
-        ;; throw_unless(err::no_owner, equal_slices(owner_address, sender_address));
+        throw_unless(101, equal_slices(owner_address, sender_address));
 
         cell msg = begin_cell()
             .store_uint(0x18, 6) ;; flags
-            .store_slice("0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j"a)
-            ;; .store_slice(owner_address) ;; destination address TODO: !
+            .store_slice(owner_address)
             .store_coins(0) ;; we don't care about this value right now
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; default message headers (see sending messages page)
             .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
@@ -75,7 +130,6 @@ global int down_sum;
     }
 
     if (op == op::place_up) {
-        ;; TODO: тоны за вычетом комиссии
         ;; TODO: только одна ставка в адреса
         ;; TODO: сохранить адрес+ставка
         ;; TODO: ограничение макс ставки
@@ -111,4 +165,9 @@ int get_down_sum() method_id {
 int get_id() method_id {
     load_data();
     return round_id;
+}
+
+slice get_owner() method_id {
+    load_data();
+    return owner_address;
 }

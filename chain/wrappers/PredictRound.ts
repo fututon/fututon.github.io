@@ -1,4 +1,14 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
+import {
+    Address,
+    beginCell,
+    Cell,
+    Contract,
+    contractAddress,
+    ContractProvider,
+    Sender,
+    SendMode,
+    toNano
+} from '@ton/core';
 
 export type PredictRoundConfig = {
     id: number;
@@ -19,6 +29,7 @@ export const Opcodes = {
     withdraw: 1,
     place_up: 2,
     place_down: 3,
+    test: 4,
 };
 
 export class PredictRound implements Contract {
@@ -39,8 +50,18 @@ export class PredictRound implements Contract {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell()
-              // .storeUint(Opcodes.deploy, 32)
+              .storeUint(Opcodes.deploy, 32)
               // .storeUint(opts.queryID ?? 0, 64) TODO: ???? зачем
+              .endCell(),
+        });
+    }
+
+    async sendTest(provider: ContractProvider, via: Sender) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.test, 32)
               .endCell(),
         });
     }
@@ -97,5 +118,10 @@ export class PredictRound implements Contract {
     async getID(provider: ContractProvider) {
         const result = await provider.get('get_id', []);
         return result.stack.readNumber();
+    }
+
+    async getOwner(provider: ContractProvider) {
+        const result = await provider.get('get_owner', []);
+        return result.stack.readAddress();
     }
 }
