@@ -1,8 +1,8 @@
-import PredictRound from "@/contracts/PredictRound.ts";
+import PredictRound from "@/contracts/PredictRound";
 import { useTonClient } from "./useTonClient";
 import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonConnect } from "./useTonConnect";
-import { Address, OpenedContract, toNano } from "ton-core";
+import { Address, OpenedContract, toNano, fromNano } from "ton-core";
 import { useQuery } from "@tanstack/react-query";
 import { CHAIN } from "@tonconnect/protocol";
 
@@ -15,7 +15,7 @@ export function usePredictRoundContract() {
 
     const contractAddress = Address.parse(network === CHAIN.MAINNET
       ? ""
-      : "kQBbia0VAWeRqFGNXgNvqRoZz9eame8RSP02GRQNPIw_QqzP")
+      : "EQDx9PIzBcjQdRnZUurzXrJX14U0atpFF67JE37V9tHDBvW5")
     const contract = new PredictRound(contractAddress);
     return client.open(contract) as OpenedContract<PredictRound>;
   }, [client]);
@@ -40,19 +40,17 @@ export function usePredictRoundContract() {
 
   return {
     address: contract?.address.toString(),
-    upSum: isUpSumFetching ? null : upSumValue,
-    downSum: isDownSumFetching ? null : downSumValue,
+    upSum: isUpSumFetching ? null : fromNano(upSumValue),
+    downSum: isDownSumFetching ? null : fromNano(downSumValue),
 
     sendPlaceUp: (value) => {
       return contract?.sendPlaceUp(sender, {
-        increaseBy: value,
-        value: toNano("0.005")
+        value: toNano(value.toString())
       });
     },
     sendPlaceDown: (value) => {
       return contract?.sendPlaceDown(sender, {
-        increaseBy: value,
-        value: toNano("0.005")
+        value: toNano(value.toString())
       });
     },
   };

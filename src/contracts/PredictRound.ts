@@ -27,7 +27,6 @@ export default class PredictRound implements Contract {
     provider: ContractProvider,
     via: Sender,
     opts: {
-      increaseBy: number;
       value: bigint;
       queryID?: number;
     }
@@ -38,7 +37,6 @@ export default class PredictRound implements Contract {
       body: beginCell()
         .storeUint(Opcodes.place_up, 32)
         .storeUint(opts.queryID ?? 0, 64)
-        .storeUint(opts.increaseBy, 32)
         .endCell(),
     });
   }
@@ -47,7 +45,6 @@ export default class PredictRound implements Contract {
     provider: ContractProvider,
     via: Sender,
     opts: {
-      increaseBy: number;
       value: bigint;
       queryID?: number;
     }
@@ -58,7 +55,6 @@ export default class PredictRound implements Contract {
       body: beginCell()
         .storeUint(Opcodes.place_down, 32)
         .storeUint(opts.queryID ?? 0, 64)
-        .storeUint(opts.increaseBy, 32)
         .endCell(),
     });
   }
