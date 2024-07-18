@@ -1,0 +1,132 @@
+#include "imports/stdlib.fc";
+
+const op::increase = "op::increase"c; ;; create an opcode from string using the "c" prefix, this results in 0x7e8764ef opcode in this case
+const op::withdraw = "op::withdraw"c; ;; 0xcb03bfaf
+const op::coinflip = 2;
+
+;; storage variables
+
+;; id is required to be able to create different instances of counters
+;; since addresses in TON depend on the initial state of the contract
+global int ctx_id;
+global int ctx_counter;
+
+;; load_data populates storage variables using stored data
+() load_data() impure {
+    var ds = get_data().begin_parse();
+
+    ctx_id = ds~load_uint(32);
+    ctx_counter = ds~load_uint(32);
+
+    ds.end_parse();
+}
+
+;; save_data stores storage variables as a cell into persistent storage
+() save_data() impure {
+    set_data(
+        begin_cell()
+            .store_uint(ctx_id, 32)
+            .store_uint(ctx_counter, 32)
+            .end_cell()
+    );
+}
+
+;; recv_internal is the main function of the contract and is called when it receives a message from other contracts
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) { ;; ignore all empty messages
+        return ();
+    }
+
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+
+    slice sender_address = cs~load_msg_addr();
+
+    load_data(); ;; here we populate the storage variables
+
+    int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
+    int query_id = in_msg_body~load_uint(64); ;; also by convention, the next 64 bits contain the "query id", although this is not always the case
+
+    if (op == op::increase) {
+        int increase_by = in_msg_body~load_uint(32);
+        ctx_counter += increase_by;
+        save_data();
+        return ();
+    }
+
+    if (op == op::coinflip) {
+
+        randomize_lt();
+        int x = rand(2); ;; generate a random number (either 0 or 1)
+
+        if (x == 1) { ;; user won
+            send_raw_message(
+                begin_cell()
+                    .store_uint(0x18, 6)
+                    .store_slice(sender_address)
+                    .store_coins(0)
+                    ;; .store_coins(2000000000) ;; 2 TON 2 000 000 000.  2000000000
+                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
+                    .store_slice("WON")
+                    .end_cell(),
+                128 ;; ignore errors & pay fees separately
+            );
+        } else {
+            send_raw_message(
+                begin_cell()
+                    .store_uint(0x18, 6)
+                    .store_slice(sender_address)
+                    .store_coins(0)
+                ;; .store_coins(2000000000) ;; 2 TON 2 000 000 000.  2000000000
+                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
+                    .store_slice("LOOSE")
+            .end_cell(),
+            3 ;; ignore errors & pay fees separately
+            );
+        }
+
+        return ();
+    }
+
+    if (op == op::withdraw) {
+        ;; cell body = begin_cell()
+        ;;     .store_uint(0, 32)
+        ;;     .store_slice(msg::commission_withdraw())
+        ;;     .end_cell();
+
+        ;; EQC7IWHa_QCcCVpeh8rRxrHhCzswZwMMHPIg9q948LUTr0me
+        cell msg = begin_cell()
+            .store_uint(0x18, 6) ;; flags
+            .store_slice("UQC7IWHa_QCcCVpeh8rRxrHhCzswZwMMHPIg9q948LUTrxRb"a) ;; destination address
+            .store_coins(0) ;; we don't care about this value right now
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; default message headers (see sending messages page)
+            .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
+            .store_slice("Hello from FunC!") ;; comment
+            .end_cell();
+        send_raw_message(msg, 128); ;; mode = 128 is used for messages that are to carry all the remaining balance of the current smart contract
+
+        return ();
+    }
+
+    return ();
+    ;; throw(0xffff); ;; if the message contains an op that is not known to this contract, we throw
+}
+
+;; get methods are a means to conveniently read contract data using, for example, HTTP APIs
+;; they are marked with method_id
+;; note that unlike in many other smart contract VMs, get methods cannot be called by other contracts
+
+int get_counter() method_id {
+    load_data();
+    return ctx_counter;
+}
+
+int get_id() method_id {
+    load_data();
+    return ctx_id;
+}

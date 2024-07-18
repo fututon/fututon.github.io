@@ -1,0 +1,114 @@
+#include "imports/stdlib.fc";
+
+const op::deploy = 0;
+const op::withdraw = 1;
+const op::place_up = 2;
+const op::place_down = 3;
+
+global int round_id;
+global int up_sum;
+global int down_sum;
+
+() load_data() impure {
+    var ds = get_data().begin_parse();
+
+    round_id = ds~load_uint(32);
+    up_sum = ds~load_coins();
+    down_sum = ds~load_coins();
+
+    ds.end_parse();
+}
+
+() save_data() impure {
+    set_data(
+        begin_cell()
+            .store_uint(round_id, 32)
+            .store_coins(up_sum)
+            .store_coins(down_sum)
+            .end_cell()
+    );
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) { ;; ignore all empty messages
+        return ();
+    }
+
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+
+    ;;
+
+    slice sender_address = cs~load_msg_addr();
+
+    load_data(); ;; here we populate the storage variables
+
+    int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
+    int query_id = in_msg_body~load_uint(64); ;; also by convention, the next 64 bits contain the "query id", although this is not always the case
+
+    ;; MESSAGES
+
+    if (op == op::deploy) {
+        ;; TODO: Ставим что задеплоен
+        ;; TODO: ставим овнера
+        return ();
+    }
+
+    if (op == op::withdraw) {
+        ;; throw_unless(err::no_owner, equal_slices(owner_address, sender_address));
+
+        cell msg = begin_cell()
+            .store_uint(0x18, 6) ;; flags
+            .store_slice("0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j"a)
+            ;; .store_slice(owner_address) ;; destination address TODO: !
+            .store_coins(0) ;; we don't care about this value right now
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; default message headers (see sending messages page)
+            .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
+            .store_slice("Owner withdraw!") ;; comment
+            .end_cell();
+        send_raw_message(msg, 128); ;; mode = 128 is used for messages that are to carry all the remaining balance of the current smart contract
+
+        return ();
+    }
+
+    if (op == op::place_up) {
+        ;; TODO: тоны за вычетом комиссии
+        ;; TODO: только одна ставка в адреса
+        ;; TODO: сохранить адрес+ставка
+        ;; TODO: ограничение макс ставки
+
+        int bet_amount = msg_value;
+        up_sum += bet_amount;
+        save_data();
+        return ();
+    }
+
+    if (op == op::place_down) {
+        int bet_amount = msg_value;
+        down_sum += bet_amount;
+        save_data();
+        return ();
+    }
+
+    throw(0xffff); ;; if the message contains an op that is not known to this contract, we throw
+}
+
+;; GETTERS
+
+int get_up_sum() method_id {
+    load_data();
+    return up_sum;
+}
+
+int get_down_sum() method_id {
+    load_data();
+    return down_sum;
+}
+
+int get_id() method_id {
+    load_data();
+    return round_id;
+}

@@ -1,0 +1,97 @@
+#include "imports/stdlib.fc";
+
+const int err::no_owner = 1002;
+
+const op::deploy = 0;
+const op::set_last_price = 1;
+const op::withdraw = 2;
+
+global slice owner_address;
+global int ctx_id;
+global int ctx_last_price;
+
+() load_data() impure {
+    var ds = get_data().begin_parse();
+    owner_address = ds~load_msg_addr();
+    ctx_id = ds~load_uint(32);
+    ctx_last_price = ds~load_uint(32);
+    ds.end_parse();
+}
+
+() save_data() impure {
+    cell data = begin_cell()
+        .store_slice(owner_address)
+        .store_uint(ctx_id, 32)
+        .store_uint(ctx_last_price, 32)
+        .end_cell();
+    set_data(data);
+}
+
+;; recv_internal is the main function of the contract and is called when it receives a message from other contracts
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) { ;; ignore all empty messages
+        return ();
+    }
+
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+
+    ;;
+
+    slice sender_address = cs~load_msg_addr();
+
+    load_data(); ;; here we populate the storage variables
+
+    int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
+    int query_id = in_msg_body~load_uint(64); ;; also by convention, the next 64 bits contain the "query id", although this is not always the case
+
+    ;;
+
+    if (op == op::deploy) {
+        ;; Ставим что задеплоен
+        ;; ставим админа
+        return ();
+    }
+
+
+    if (op == op::set_last_price) {
+        ;; throw_unless(err::no_owner, equal_slices(owner_address, sender_address));
+
+        int new_last_price = in_msg_body~load_uint(32);
+        ctx_last_price = new_last_price;
+        save_data();
+        return ();
+    }
+
+    if (op == op::withdraw) {
+        ;; throw_unless(err::no_owner, equal_slices(owner_address, sender_address));
+
+        cell msg = begin_cell()
+            .store_uint(0x18, 6) ;; flags
+            .store_slice(owner_address) ;; destination address
+            .store_coins(0) ;; we don't care about this value right now
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1) ;; default message headers (see sending messages page)
+            .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
+            .store_slice("Owner withdraw!") ;; comment
+            .end_cell();
+        send_raw_message(msg, 128); ;; mode = 128 is used for messages that are to carry all the remaining balance of the current smart contract
+
+        return ();
+    }
+
+    throw(0xffff); ;; if the message contains an op that is not known to this contract, we throw
+}
+
+
+int get_last_price() method_id {
+    load_data();
+    return ctx_last_price;
+}
+
+int get_id() method_id {
+    load_data();
+    return ctx_id;
+}
