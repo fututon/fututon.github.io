@@ -84,6 +84,10 @@ describe('PredictRound', () => {
 
             console.log('counter after increasing', counterAfter);
 
+            const info = await predictRound.getPlayerInfo(increaser.address);
+
+            console.log('info', info);
+
             expect(counterAfter).toBe(counterBefore + increaseBy);
         }
     });

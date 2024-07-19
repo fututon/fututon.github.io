@@ -7,7 +7,7 @@ import {
     ContractProvider,
     Sender,
     SendMode,
-    toNano
+    toNano, TupleBuilder
 } from '@ton/core';
 
 export type PredictRoundConfig = {
@@ -123,5 +123,18 @@ export class PredictRound implements Contract {
     async getOwner(provider: ContractProvider) {
         const result = await provider.get('get_owner', []);
         return result.stack.readAddress();
+    }
+
+    async getPlayerInfo(provider: ContractProvider, playerAddress: Address) {
+        const args= new TupleBuilder();
+        args.writeAddress(playerAddress);
+
+        const result = await provider.get('get_player_info', args.build());
+
+        const flag = result.stack.readBoolean();
+        const address = result.stack.readAddress();
+        const betAmount = result.stack.readNumber();
+        const betDirection = result.stack.readNumber();
+        return [flag, address, betAmount, betDirection]
     }
 }

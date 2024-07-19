@@ -9,13 +9,14 @@ PredictRound
 
     widthdraw prize
 
+
+
     get_round_info
        стейт
        сумма ставок
        upSum
        downSum
-
-
+       кол-во ставок
 
 
     get_player_info(address)
