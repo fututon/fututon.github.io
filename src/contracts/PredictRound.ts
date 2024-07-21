@@ -91,15 +91,15 @@ export default class PredictRound implements Contract {
   }
 
   async getRoundInfo(provider: ContractProvider) {
-    console.log("getRoundInfo")
     const result = await provider.get('get_round_info', []);
-
-    console.log("getRoundInfo1212", result)
 
     const roundId = result.stack.readNumber();
     const roundState = result.stack.readNumber();
     const upSum = result.stack.readNumber();
     const downSum = result.stack.readNumber();
-    return [roundId, roundState, upSum, downSum]
+    const startPrice = result.stack.readNumber();
+    const endPrice = result.stack.readNumber();
+
+    return [roundId, roundState, upSum, downSum, startPrice, endPrice];
   }
 }

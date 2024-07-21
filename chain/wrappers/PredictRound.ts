@@ -11,18 +11,21 @@ import {
 } from '@ton/core';
 
 export type PredictRoundConfig = {
-    round_id: number;
     deployed: number;
+    round_id: number;
+    state: number;
     up_sum: number;
     down_sum: number;
 };
 
 export function predictRoundConfigToCell(config: PredictRoundConfig): Cell {
     return beginCell()
-      .storeUint(config.round_id, 32)
-      .storeAddress(null)
-      .storeCoins(config.up_sum)
-      .storeCoins(config.down_sum)
+      // .storeUint(config.deployed, 32)
+      // .storeAddress(Address.parse('0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j'))
+      // .storeUint(config.round_id, 32)
+      // .storeCoins(config.state)
+      // .storeCoins(config.up_sum)
+      // .storeCoins(config.down_sum)
       .endCell();
 }
 
@@ -32,6 +35,8 @@ export const Opcodes = {
     place_up: 2,
     place_down: 3,
     test: 4,
+    withdraw_winning: 5,
+    set_state: 6
 };
 
 export class PredictRound implements Contract {
@@ -53,8 +58,7 @@ export class PredictRound implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell()
               .storeUint(Opcodes.deploy, 32)
-              .storeStringTail("Deploy")
-              // .storeUint(opts.queryID ?? 0, 64) TODO: ???? зачем
+              .storeUint(0, 64) // TODO: ???? зачем
               .endCell(),
         });
     }
@@ -108,6 +112,25 @@ export class PredictRound implements Contract {
         });
     }
 
+    async sendSetState(
+      provider: ContractProvider,
+      via: Sender,
+      opts: {
+          state: number;
+          queryID?: number;
+      }
+    ) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.set_state, 32)
+              .storeUint(opts.queryID ?? 0, 64)
+              .storeInt(opts.state, 32)
+              .endCell(),
+        });
+    }
+
     async getUpSum(provider: ContractProvider) {
         const result = await provider.get('get_up_sum', []);
         return result.stack.readNumber();
@@ -148,6 +171,9 @@ export class PredictRound implements Contract {
         const roundState = result.stack.readNumber();
         const upSum = result.stack.readNumber();
         const downSum = result.stack.readNumber();
-        return [roundId, roundState, upSum, downSum]
+        const startPrice = result.stack.readNumber();
+        const endPrice = result.stack.readNumber();
+
+        return [roundId, roundState, upSum, downSum, startPrice, endPrice];
     }
 }

@@ -21,7 +21,9 @@ describe('PredictRound', () => {
         predictRound = blockchain.openContract(
             PredictRound.createFromConfig(
                 {
-                    id: 0,
+                    deployed: 0,
+                    round_id: 0,
+                    state: 0,
                     up_sum: 0,
                     down_sum: 0
                 },
@@ -35,7 +37,7 @@ describe('PredictRound', () => {
 
         const deployResult = await predictRound.sendDeploy(deployer.getSender(), toNano('0.05'));
 
-        // console.log(deployResult)
+        console.log(deployResult)
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,

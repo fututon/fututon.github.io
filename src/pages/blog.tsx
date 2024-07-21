@@ -34,7 +34,7 @@ export default function DocsPage() {
   const renderCard = () => {
     return (
       <div className="p-1">
-        <RoundCard contractAddress="EQDdNC_nXgv6kvmPSA-YJRJAgfzwaWTUVToGJwU50F8QwPRJ" />
+        <RoundCard contractAddress="EQDmh6b0psVP9KX4SGP7hO2xNTuYjTsBlH-RRFmzFUxImt_B" />
       </div>
 
     )
