@@ -88,6 +88,10 @@ describe('PredictRound', () => {
 
             console.log('info', info);
 
+            const roundInfo = await predictRound.getRoundInfo();
+
+            console.log('roundInfo', roundInfo);
+
             expect(counterAfter).toBe(counterBefore + increaseBy);
         }
     });

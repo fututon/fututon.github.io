@@ -6,17 +6,14 @@ import { Address, OpenedContract, toNano, fromNano } from "ton-core";
 import { useQuery } from "@tanstack/react-query";
 import { CHAIN } from "@tonconnect/protocol";
 
-export function usePredictRoundContract() {
+export function usePredictRoundContract(contractAddress: string) {
   const { client } = useTonClient();
   const { sender, network } = useTonConnect();
 
   const contract = useAsyncInitialize(async () => {
     if (!client) return;
 
-    const contractAddress = Address.parse(network === CHAIN.MAINNET
-      ? ""
-      : "EQDx9PIzBcjQdRnZUurzXrJX14U0atpFF67JE37V9tHDBvW5")
-    const contract = new PredictRound(contractAddress);
+    const contract = new PredictRound(Address.parse(contractAddress));
     return client.open(contract) as OpenedContract<PredictRound>;
   }, [client]);
 
@@ -38,10 +35,20 @@ export function usePredictRoundContract() {
     { refetchInterval: 3000 }
   );
 
+  const { data: roundInfoValue, isFetching: isRoundInfoFetching } = useQuery(
+    ["round_info"],
+    async () => {
+      if (!contract) return null;
+      return await contract!.getRoundInfo();
+    },
+    { refetchInterval: 3000 }
+  );
+
   return {
     address: contract?.address.toString(),
     upSum: upSumValue ? fromNano(upSumValue) : null,
     downSum: downSumValue ? fromNano(downSumValue) : null,
+    roundInfo: roundInfoValue ? roundInfoValue : null,
 
     sendPlaceUp: (value) => {
       return contract?.sendPlaceUp(sender, {

@@ -1,4 +1,5 @@
 #include "imports/stdlib.fc";
+#include "imports/msgs.fc";
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> (tuple, X) ~tpop (tuple t) asm "TPOP";
@@ -10,6 +11,7 @@ const op::withdraw = 1;
 const op::place_up = 2;
 const op::place_down = 3;
 const op::test = 4;
+const op::withdraw_winning = 5;
 
 global int deployed;
 global slice owner_address;
@@ -102,9 +104,9 @@ global cell bets;
         ~strdump("DEPLOY");
 
         ;; Загружаем флаг деплоя
-        var ds = get_data().begin_parse();
-        deployed = ds~load_uint(32);
-        throw_if(100, deployed);
+        ;; var ds = get_data().begin_parse();
+        ;; deployed = ds~load_uint(32);
+        ;; throw_if(100, deployed);
 
         deployed = 1;
         owner_address = sender_address;
@@ -176,7 +178,7 @@ global cell bets;
             .store_uint(0, 32) ;; zero opcode - means simple transfer message with comment
             .store_slice("Owner withdraw!") ;; comment
             .end_cell();
-        send_raw_message(msg, 128); ;; mode = 128 is used for messages that are to carry all the remaining balance of the current smart contract
+        send_raw_message(msg, CARRY_ALL_BALANCE); ;; mode = 128 is used for messages that are to carry all the remaining balance of the current smart contract
 
         return ();
     }
@@ -198,6 +200,21 @@ global cell bets;
         down_sum += bet_amount;
         store_bet_in_dict(sender_address, bet_amount, 2);
         save_data();
+        return ();
+    }
+
+    if (op == op::withdraw_winning) {
+        (int flag, slice address, int bet_amount, int bet_direction) = load_bet_from_dict(sender_address);
+        ;; TODO: если нет ставки, то выход
+        ;; TODO: если ставка не выигрышная, то выход
+
+        int winning_prize = 1; ;; TODO: рассчет коэф в зависимости от стороны, минус комиссия
+
+        ;; TODO: отметка что выведен приз (что если ошибка?)
+        msgs::send_empty(winning_prize, sender_address, CARRY_REMAINING_GAS);
+
+        save_data();
+
         return ();
     }
 
@@ -229,4 +246,13 @@ slice get_owner() method_id {
 (int, slice, int, int) get_player_info(slice player_address) method_id {
     load_data();
     return load_bet_from_dict(player_address);
+}
+
+(int, int, int, int ) get_round_info() method_id {
+    load_data();
+    ;; раунд
+    ;; стейт
+    ;; upSum
+    ;; downSum
+    return (round_id, 1, up_sum, down_sum);
 }

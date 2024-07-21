@@ -11,14 +11,16 @@ import {
 } from '@ton/core';
 
 export type PredictRoundConfig = {
-    id: number;
+    round_id: number;
+    deployed: number;
     up_sum: number;
     down_sum: number;
 };
 
 export function predictRoundConfigToCell(config: PredictRoundConfig): Cell {
     return beginCell()
-      .storeUint(config.id, 32)
+      .storeUint(config.round_id, 32)
+      .storeAddress(null)
       .storeCoins(config.up_sum)
       .storeCoins(config.down_sum)
       .endCell();
@@ -51,6 +53,7 @@ export class PredictRound implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell()
               .storeUint(Opcodes.deploy, 32)
+              .storeStringTail("Deploy")
               // .storeUint(opts.queryID ?? 0, 64) TODO: ???? зачем
               .endCell(),
         });
@@ -136,5 +139,15 @@ export class PredictRound implements Contract {
         const betAmount = result.stack.readNumber();
         const betDirection = result.stack.readNumber();
         return [flag, address, betAmount, betDirection]
+    }
+
+    async getRoundInfo(provider: ContractProvider) {
+        const result = await provider.get('get_round_info', []);
+
+        const roundId = result.stack.readNumber();
+        const roundState = result.stack.readNumber();
+        const upSum = result.stack.readNumber();
+        const downSum = result.stack.readNumber();
+        return [roundId, roundState, upSum, downSum]
     }
 }

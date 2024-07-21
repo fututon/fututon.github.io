@@ -6,7 +6,8 @@ import {
   Cell,
   contractAddress,
   beginCell,
-  SendMode
+  SendMode,
+  TupleBuilder
 } from "ton-core";
 
 const Opcodes = {
@@ -36,7 +37,8 @@ export default class PredictRound implements Contract {
       sendMode: SendMode.PAY_GAS_SEPARATLY,
       body: beginCell()
         .storeUint(Opcodes.place_up, 32)
-        .storeUint(opts.queryID ?? 0, 64)
+        // .storeUint(opts.queryID ?? 0, 64)
+        .storeStringTail("Place Up")
         .endCell(),
     });
   }
@@ -55,6 +57,7 @@ export default class PredictRound implements Contract {
       body: beginCell()
         .storeUint(Opcodes.place_down, 32)
         .storeUint(opts.queryID ?? 0, 64)
+        .storeStringTail("Place Down")
         .endCell(),
     });
   }
@@ -72,5 +75,31 @@ export default class PredictRound implements Contract {
   async getID(provider: ContractProvider) {
     const result = await provider.get('get_id', []);
     return result.stack.readNumber();
+  }
+
+  async getPlayerInfo(provider: ContractProvider, playerAddress: Address) {
+    const args= new TupleBuilder();
+    args.writeAddress(playerAddress);
+
+    const result = await provider.get('get_player_info', args.build());
+
+    const flag = result.stack.readBoolean();
+    const address = result.stack.readAddress();
+    const betAmount = result.stack.readNumber();
+    const betDirection = result.stack.readNumber();
+    return [flag, address, betAmount, betDirection]
+  }
+
+  async getRoundInfo(provider: ContractProvider) {
+    console.log("getRoundInfo")
+    const result = await provider.get('get_round_info', []);
+
+    console.log("getRoundInfo1212", result)
+
+    const roundId = result.stack.readNumber();
+    const roundState = result.stack.readNumber();
+    const upSum = result.stack.readNumber();
+    const downSum = result.stack.readNumber();
+    return [roundId, roundState, upSum, downSum]
   }
 }

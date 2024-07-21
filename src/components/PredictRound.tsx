@@ -7,8 +7,10 @@ import {useState} from "react";
 
 export default function PredictRound() {
   const { connected } = useTonConnect();
-  const predictRoundContract = usePredictRoundContract();
+  const predictRoundContract = usePredictRoundContract("EQDdNC_nXgv6kvmPSA-YJRJAgfzwaWTUVToGJwU50F8QwPRJ");
   const [bet, setBet] = useState(0);
+
+  console.log(predictRoundContract)
 
   return (
     <div className="Container">
