@@ -12,17 +12,10 @@ export default function RoundCard({ contractAddress }) {
   const predictRoundContract = usePredictRoundContract(contractAddress);
   const [bet, setBet] = useState(0);
 
-  const stateToStr = (state) => {
-    if (state == 0) return 'Новый';
-    if (state == 1) return 'Ставки принимаются';
-    if (state == 2) return 'Ставки завершены';
-    if (state == 3) return 'Раунд начат';
-    if (state == 4) return 'Раунд завершен';
-    return 'Неизвестный'
-  }
+
+  console.log(predictRoundContract)
 
   const prizeSum = predictRoundContract.roundInfo ? fromNano(predictRoundContract.roundInfo[2] + predictRoundContract.roundInfo[3]) : '';
-  const stateStr = predictRoundContract.roundInfo ? stateToStr(predictRoundContract?.roundInfo[1]) : '';
 
   const renderLoading = () => {
     return (
@@ -120,7 +113,7 @@ export default function RoundCard({ contractAddress }) {
   }
 
   const renderStartedRound = () => {
-    const startPrice = predictRoundContract.roundInfo[4];
+    const startPrice = fromNano(predictRoundContract.roundInfo[4]);
 
     return (
       <Card
@@ -151,8 +144,8 @@ export default function RoundCard({ contractAddress }) {
   }
 
   const renderFinishedRound = () => {
-    const startPrice = predictRoundContract.roundInfo[4];
-    const finishPrice = predictRoundContract.roundInfo[4];
+    const startPrice = fromNano(predictRoundContract.roundInfo[4]);
+    const finishPrice = fromNano(predictRoundContract.roundInfo[5]);
 
     return (
       <Card
@@ -176,7 +169,9 @@ export default function RoundCard({ contractAddress }) {
             <Button
               color="primary"
               isDisabled={!connected}
-              onClick={() => {}}
+              onClick={() => {
+                predictRoundContract.sendWithdrawWinning();
+              }}
             >
               Withdraw prize
             </Button>

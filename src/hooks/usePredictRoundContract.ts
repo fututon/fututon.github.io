@@ -60,5 +60,8 @@ export function usePredictRoundContract(contractAddress: string) {
         value: toNano(value.toString())
       });
     },
+    sendWithdrawWinning: () => {
+      return contract?.sendWithdrawWinning(sender);
+    }
   };
 }

@@ -7,7 +7,8 @@ import {
   contractAddress,
   beginCell,
   SendMode,
-  TupleBuilder
+  TupleBuilder,
+   toNano
 } from "ton-core";
 
 const Opcodes = {
@@ -15,6 +16,7 @@ const Opcodes = {
   withdraw: 1,
   place_up: 2,
   place_down: 3,
+  withdraw_winning: 5
 };
 
 export default class PredictRound implements Contract {
@@ -58,6 +60,17 @@ export default class PredictRound implements Contract {
         .storeUint(Opcodes.place_down, 32)
         .storeUint(opts.queryID ?? 0, 64)
         .storeStringTail("Place Down")
+        .endCell(),
+    });
+  }
+
+  async sendWithdrawWinning(provider: ContractProvider, via: Sender) {
+    await provider.internal(via, {
+      value: toNano('0.005'),
+      sendMode: SendMode.PAY_GAS_SEPARATLY,
+      body: beginCell()
+        .storeUint(Opcodes.withdraw_winning, 32)
+        .storeUint(0, 64)
         .endCell(),
     });
   }

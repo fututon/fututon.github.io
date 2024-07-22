@@ -72,13 +72,14 @@ global cell bets;
     );
 }
 
-() store_bet_in_dict(slice sender_address, int bet_amount, int bet_direction) impure {
+() store_bet_in_dict(slice sender_address, int bet_amount, int bet_direction, int is_claimed) impure {
     ~strdump("STORE BET");
 
     cell bet_cell = begin_cell()
         .store_slice(sender_address)
         .store_uint(bet_amount, 32)
         .store_uint(bet_direction, 32)
+        .store_int(is_claimed, 32)
         .end_cell();
 
     bets~dict_set(256, sender_address, bet_cell.begin_parse());
@@ -86,25 +87,28 @@ global cell bets;
     ~strdump("STORE BET FIN");
 }
 
-(int, slice, int, int) load_bet_from_dict(slice sender_address) impure {
+(int, slice, int, int, int) load_bet_from_dict(slice sender_address) impure {
     ~strdump("LOAD BET");
 
     (slice value, int flag) = dict_get?(bets, 256, sender_address);
 
-    ;; TODO: если не найден?
+    if (flag == false) {
+        return (flag, sender_address, 0, 0, 0);
+    }
 
     ~strdump("val");
 
     slice address = value~load_msg_addr();
     int bet_amount = value~load_uint(32);
     int bet_direction = value~load_uint(32);
+    int is_claimed = value~load_int(32);
 
     ~dump(address);
     ~dump(bet_amount);
 
     ~strdump("LOAD BET FIN");
 
-    return (flag, address, bet_amount, bet_direction);
+    return (flag, address, bet_amount, bet_direction, is_claimed);
 }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -229,14 +233,16 @@ global cell bets;
 
     if (op == op::place_up) {
         throw_unless(200, state == state::betting_started);
-        ;; TODO: только одна ставка в адреса
-        ;; TODO: сохранить адрес+ставка
-        ;; TODO: ограничение макс ставки
 
+        ;; (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
+        ;; throw_if(201, flag); ;; Ставка сделана
+
+        ;; TODO: ограничение макс ставки
 
         int bet_amount = msg_value;
         up_sum += bet_amount;
-        store_bet_in_dict(sender_address, bet_amount, direction::up);
+        store_bet_in_dict(sender_address, bet_amount, direction::up, false);
+
         save_data();
         return ();
     }
@@ -244,51 +250,81 @@ global cell bets;
     if (op == op::place_down) {
         throw_unless(200, state == state::betting_started);
 
+        ;; (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
+        ;; throw_if(201, flag); ;; Ставка сделана
+
         int bet_amount = msg_value;
         down_sum += bet_amount;
-        store_bet_in_dict(sender_address, bet_amount, direction::down);
+        store_bet_in_dict(sender_address, bet_amount, direction::down, false);
+
         save_data();
         return ();
     }
 
     if (op == op::withdraw_winning) {
+        ~strdump("WITHDRAW WINNING");
+
         throw_unless(300, state == state::round_finished);
+        (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
+        throw_unless(301, flag); ;; Ставка не сделана
+        throw_unless(302, round_direction == bet_direction);
+        throw_if(303, is_claimed);
 
-        (int flag, slice address, int bet_amount, int bet_direction) = load_bet_from_dict(sender_address);
-        ;; TODO: если нет ставки, то выход
-        throw_unless(301, round_direction == bet_direction);
+        int prize_sum = (up_sum + down_sum); ;; TODO: комиссия
 
-        int winning_prize = 1; ;; TODO: рассчет коэф в зависимости от стороны, минус комиссия
+        ~strdump("prize sum");
+        ~dump(prize_sum);
 
-        ;; TODO: отметка что выведен приз (что если ошибка?)
+
+        ;; TOOD: неправильный рассчет
+
+        int winning_prize = 0;
+        if (bet_direction == direction::up) {
+            winning_prize = bet_amount / up_sum * prize_sum;
+        } else {
+            winning_prize = bet_amount / down_sum * prize_sum;
+        }
+
+        ~strdump("winning_prize");
+        ~dump(winning_prize);
+
+        store_bet_in_dict(address, bet_amount, bet_direction, true);
+
+        ;; TODO: что если ошибка?)
         msgs::send_empty(winning_prize, sender_address, CARRY_REMAINING_GAS);
 
         save_data();
-
         return ();
     }
 
     if (op == op::set_state) {
         throw_unless(101, equal_slices(owner_address, sender_address));
 
-        ;; TODO: переделать / добавить старт и фин раунда с ценой
-
         int new_state = in_msg_body~load_uint(32);
         state = new_state;
+
         save_data();
         return ();
     }
 
     if (op == op::start_round) {
+        ~strdump("START ROUND");
+
         throw_unless(101, equal_slices(owner_address, sender_address));
 
         start_price = in_msg_body~load_uint(32);
+
+
+        ~strdump("START ROUND");
+
         state = state::round_started;
         save_data();
         return ();
     }
 
     if (op == op::finish_round) {
+        ~strdump("FINISH ROUND");
+
         throw_unless(101, equal_slices(owner_address, sender_address));
 
         finish_price = in_msg_body~load_uint(32);
@@ -301,6 +337,7 @@ global cell bets;
         }
 
         state = state::round_finished;
+
         save_data();
         return ();
     }
@@ -330,7 +367,7 @@ slice get_owner() method_id {
     return owner_address;
 }
 
-(int, slice, int, int) get_player_info(slice player_address) method_id {
+(int, slice, int, int, int) get_player_info(slice player_address) method_id {
     load_data();
     return load_bet_from_dict(player_address);
 }

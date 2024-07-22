@@ -36,7 +36,9 @@ export const Opcodes = {
     place_down: 3,
     test: 4,
     withdraw_winning: 5,
-    set_state: 6
+    set_state: 6,
+    start_round: 7,
+    finish_round: 8
 };
 
 export class PredictRound implements Contract {
@@ -81,9 +83,6 @@ export class PredictRound implements Contract {
             queryID?: number;
         }
     ) {
-
-        
-
         await provider.internal(via, {
             value: opts.value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
@@ -127,6 +126,47 @@ export class PredictRound implements Contract {
               .storeUint(Opcodes.set_state, 32)
               .storeUint(opts.queryID ?? 0, 64)
               .storeInt(opts.state, 32)
+              .endCell(),
+        });
+    }
+
+    async sendWithdrawWinning(provider: ContractProvider, via: Sender) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.withdraw_winning, 32)
+              .storeUint(0, 64)
+              .endCell(),
+        });
+    }
+
+    async sendStartRound(provider: ContractProvider, via: Sender, opts: {
+        start_price: bigint;
+        queryID?: number;
+    }) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.start_round, 32)
+              .storeUint(opts.queryID ?? 0, 64)
+              .storeUint(opts.start_price, 32)
+              .endCell(),
+        });
+    }
+
+    async sendFinishRound(provider: ContractProvider, via: Sender, opts: {
+        finish_price: bigint;
+        queryID?: number;
+    }) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.finish_round, 32)
+              .storeUint(opts.queryID ?? 0, 64)
+              .storeUint(opts.finish_price, 32)
               .endCell(),
         });
     }

@@ -109,6 +109,38 @@ describe('PredictRound', () => {
 
         const owner = await predictRound.getOwner();
         console.log(owner)
+    });
+
+    it('withdraw winning', async () => {
+        const wallet = await blockchain.treasury('wallet');
+        const balance = await wallet.getBalance();
+        console.log('Balane', balance);
+
+        const result = await predictRound.sendPlaceUp(wallet.getSender(), { value: toNano(1) });
+        console.log(result)
+
+        let roundInfo = await predictRound.getRoundInfo();
+        console.log(roundInfo)
+
+
+        deployer = await blockchain.treasury('deployer');
+
+        const startRoundResult = await predictRound.sendStartRound(deployer.getSender(), { start_price: toNano(1) });
+        console.log("startRoundResult", startRoundResult)
+
+        const finishRoundResult = await predictRound.sendFinishRound(deployer.getSender(), { finish_price: toNano(2) });
+        console.log("finishRoundResult", finishRoundResult)
+
+
+        roundInfo = await predictRound.getRoundInfo();
+        console.log(roundInfo)
+
+        const withdrawWinningResult = await predictRound.sendWithdrawWinning(wallet.getSender());
+        console.log("withdrawWinningResult", withdrawWinningResult)
+
+
+        const balanceAfter = await wallet.getBalance();
+        console.log('balanceAfter', balanceAfter);
 
 
 
