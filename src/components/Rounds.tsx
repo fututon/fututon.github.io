@@ -3,7 +3,7 @@ import Carousel from "react-multi-carousel";
 import {useEffect} from "react";
 import {divider} from "@nextui-org/theme";
 
-export default function Rounds({ contracts }) {
+export default function Rounds({ contracts, loading }) {
   let CarouselElement = null;
 
   useEffect(() => {

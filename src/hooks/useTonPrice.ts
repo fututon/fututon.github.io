@@ -1,7 +1,4 @@
-import { exchanges } from 'ccxt';
-import { useAsyncInitialize } from "./useAsyncInitialize";
 import {useQuery} from "@tanstack/react-query";
-import {Address} from "ton-core";
 
 export function useTonPrice() {
 

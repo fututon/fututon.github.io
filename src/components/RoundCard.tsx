@@ -152,7 +152,7 @@ export default function RoundCard({ contractAddress }) {
 
   const renderStartedRound = () => {
     const startPrice = fromNano(roundInfo.startPrice);
-    const priceKlass = startPrice < price ? 'text-success font-bold' : 'text-danger font-bold';
+    const priceKlass = Number.parseFloat(startPrice) < price ? 'text-success font-bold' : 'text-danger font-bold';
 
     return (
       <Card
