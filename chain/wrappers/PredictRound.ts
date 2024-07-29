@@ -151,7 +151,7 @@ export class PredictRound implements Contract {
             body: beginCell()
               .storeUint(Opcodes.start_round, 32)
               .storeUint(opts.queryID ?? 0, 64)
-              .storeUint(opts.start_price, 32)
+              .storeCoins(opts.start_price)
               .endCell(),
         });
     }
@@ -166,7 +166,7 @@ export class PredictRound implements Contract {
             body: beginCell()
               .storeUint(Opcodes.finish_round, 32)
               .storeUint(opts.queryID ?? 0, 64)
-              .storeUint(opts.finish_price, 32)
+              .storeCoins(opts.finish_price)
               .endCell(),
         });
     }
@@ -201,6 +201,7 @@ export class PredictRound implements Contract {
         const address = result.stack.readAddress();
         const betAmount = result.stack.readNumber();
         const betDirection = result.stack.readNumber();
+
         return [flag, address, betAmount, betDirection]
     }
 
@@ -212,8 +213,9 @@ export class PredictRound implements Contract {
         const upSum = result.stack.readNumber();
         const downSum = result.stack.readNumber();
         const startPrice = result.stack.readNumber();
-        const endPrice = result.stack.readNumber();
+        const finishPrice = result.stack.readNumber();
+        const roundDirection = result.stack.readNumber();
 
-        return [roundId, roundState, upSum, downSum, startPrice, endPrice];
+        return [roundId, roundState, upSum, downSum, startPrice, finishPrice, roundDirection];
     }
 }

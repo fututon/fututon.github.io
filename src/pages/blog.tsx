@@ -1,103 +1,46 @@
-import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
-
-import React, {useMemo, useState} from "react";
-import {Tabs, Tab, Card, CardBody, CardHeader, Divider} from "@nextui-org/react";
 import Chart from "@/components/chart.tsx";
-import Carousel from "react-multi-carousel";
-import {Image} from "@nextui-org/image";
-import {Button} from "@nextui-org/button";
-import RoundCard from "@/components/RoundCard.tsx";
+import {useQuery} from "@tanstack/react-query";
+import Rounds from "@/components/Rounds";
 
 export default function DocsPage() {
-  const [selected, setSelected] = useState("bets");
-  let CarouselElement = null;
+  const { data: contracts, isInitialLoading: isContractsInitialLoading } = useQuery({
+    queryKey: ["contracts"],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/contracts')
 
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
 
-  const MemoChart = useMemo(() => {
-
-    console.log('MEMO')
-
-    // Это ваш компонент или элемент, который вы хотите рендерить и кэшировать
-    return <Chart />;
-  }, []);
+      return response.json()
+    },
+    refetchInterval: 3000
+  });
 
   const renderChart = () => {
-
-    console.log("RENDER")
+    console.log("RENDER chart")
 
     return (
       <Chart />
     )
   }
 
-  const renderCard = () => {
+  const renderCards = () => {
     return (
-      <div className="p-1">
-        <RoundCard contractAddress="EQDPlSpzT-hkWpWlVdJQJLTEPcWH0YH-G6hnIizQQGgwblUP" />
-      </div>
-
+      <Rounds
+        contracts={contracts}
+        loading={isContractsInitialLoading}
+      />
     )
   }
-
-  const renderCarousel = () => {
-    const responsive = {
-      superLargeDesktop: {
-        // the naming can be any, depends on you.
-        breakpoint: { max: 4000, min: 3000 },
-        items: 5
-      },
-      desktop: {
-        breakpoint: { max: 3000, min: 1024 },
-        items: 3
-      },
-      tablet: {
-        breakpoint: { max: 1024, min: 464 },
-        items: 1,
-        partialVisibilityGutter: 40,
-      },
-      mobile: {
-        breakpoint: { max: 464, min: 0 },
-        items: 1,
-        partialVisibilityGutter: 20
-      }
-    };
-
-    return (
-      <div className="w:100%">
-        <Carousel
-          ref={(el) => (CarouselElement = el)}
-          responsive={responsive}
-          swipeable={true}
-          draggable={true}
-          // partialVisible={true}
-          centerMode={true}
-          focusOnSelect={true}
-        >
-          {renderCard()}
-          {/*{renderCard()}*/}
-          {/*{renderCard()}*/}
-          {/*{renderCard()}*/}
-          {/*{renderCard()}*/}
-          {/*{renderCard()}*/}
-        </Carousel>
-      </div>
-
-    )
-
-  }
-
 
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4">
         <div className="w-full flex flex-col gap-1">
-
-
-          {renderCarousel()}
-
-          {MemoChart}
-
+          {renderCards()}
+          {renderChart()}
         </div>
       </section>
     </DefaultLayout>

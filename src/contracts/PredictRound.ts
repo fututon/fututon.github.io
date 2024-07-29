@@ -91,16 +91,16 @@ export default class PredictRound implements Contract {
   }
 
   async getPlayerInfo(provider: ContractProvider, playerAddress: Address) {
-    const args= new TupleBuilder();
+    const args = new TupleBuilder();
     args.writeAddress(playerAddress);
-
     const result = await provider.get('get_player_info', args.build());
 
     const flag = result.stack.readBoolean();
-    const address = result.stack.readAddress();
+    const address = result.stack.readAddress(); // AVOID RERENDER
     const betAmount = result.stack.readNumber();
     const betDirection = result.stack.readNumber();
-    return [flag, address, betAmount, betDirection]
+
+    return { flag, betAmount, betDirection }
   }
 
   async getRoundInfo(provider: ContractProvider) {
@@ -111,8 +111,9 @@ export default class PredictRound implements Contract {
     const upSum = result.stack.readNumber();
     const downSum = result.stack.readNumber();
     const startPrice = result.stack.readNumber();
-    const endPrice = result.stack.readNumber();
+    const finishPrice = result.stack.readNumber();
+    const roundDirection = result.stack.readNumber();
 
-    return [roundId, roundState, upSum, downSum, startPrice, endPrice];
+    return { roundId, roundState, upSum, downSum, startPrice, finishPrice, roundDirection };
   }
 }

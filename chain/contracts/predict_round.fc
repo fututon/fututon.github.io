@@ -15,6 +15,7 @@ const op::withdraw_winning = 5;
 const op::set_state = 6;
 const op::start_round = 7;
 const op::finish_round = 8;
+const op::finish_betting = 9;
 
 const state::new = 0;
 const state::betting_started = 1;
@@ -46,8 +47,8 @@ global cell bets;
     state = ds~load_uint(32);
     up_sum = ds~load_coins();
     down_sum = ds~load_coins();
-    start_price = ds~load_uint(32);
-    finish_price = ds~load_uint(32);
+    start_price = ds~load_coins();
+    finish_price = ds~load_coins();
     round_direction = ds~load_uint(32);
     comission = ds~load_uint(32);
     bets = ds~load_dict();
@@ -63,8 +64,8 @@ global cell bets;
             .store_uint(state,32)
             .store_coins(up_sum)
             .store_coins(down_sum)
-            .store_uint(start_price, 32)
-            .store_uint(finish_price, 32)
+            .store_coins(start_price)
+            .store_coins(finish_price)
             .store_uint(round_direction, 32)
             .store_uint(comission, 32)
             .store_dict(bets)
@@ -157,8 +158,8 @@ global cell bets;
         state = 1;
         up_sum = 0;
         down_sum = 0;
-        start_price = 1;
-        finish_price = 2;
+        start_price = 0;
+        finish_price = 0;
         round_direction = 0;
         comission = 10;
         bets = new_dict();
@@ -278,11 +279,20 @@ global cell bets;
 
         ;; TOOD: неправильный рассчет
 
+
         int winning_prize = 0;
+        int precision = 1000000000;
         if (bet_direction == direction::up) {
-            winning_prize = bet_amount / up_sum * prize_sum;
+            ~strdump("UP WIN");
+            ~dump(bet_amount);
+            ~dump(up_sum);
+            ~dump(prize_sum);
+            ~strdump("--");
+            winning_prize = bet_amount * precision / up_sum * prize_sum / precision;
+            ;; winning_prize =  muldiv(muldiv(bet_amount, precision, up_sum), prize_sum, precision);
         } else {
-            winning_prize = bet_amount / down_sum * prize_sum;
+            ~strdump("DOWN WIN");
+            winning_prize = bet_amount * precision / down_sum * prize_sum / precision;
         }
 
         ~strdump("winning_prize");
@@ -312,12 +322,13 @@ global cell bets;
 
         throw_unless(101, equal_slices(owner_address, sender_address));
 
-        start_price = in_msg_body~load_uint(32);
+        start_price = in_msg_body~load_coins();
 
 
         ~strdump("START ROUND");
 
         state = state::round_started;
+
         save_data();
         return ();
     }
@@ -327,7 +338,9 @@ global cell bets;
 
         throw_unless(101, equal_slices(owner_address, sender_address));
 
-        finish_price = in_msg_body~load_uint(32);
+        finish_price = in_msg_body~load_coins();
+
+        ~dump(finish_price);
 
         ;; TODO: если цена одинаковая то чо?
         if (start_price < finish_price) {
@@ -336,7 +349,20 @@ global cell bets;
             round_direction = direction::down;
         }
 
+        ~dump(round_direction);
+
         state = state::round_finished;
+
+        save_data();
+        return ();
+    }
+
+    if (op == op::finish_betting) {
+        ~strdump("FINISH BETTING");
+
+        throw_unless(101, equal_slices(owner_address, sender_address));
+
+        state = state::betting_finished;
 
         save_data();
         return ();
@@ -372,7 +398,7 @@ slice get_owner() method_id {
     return load_bet_from_dict(player_address);
 }
 
-(int, int, int, int, int, int) get_round_info() method_id {
+(int, int, int, int, int, int, int) get_round_info() method_id {
     load_data();
-    return (round_id, state, up_sum, down_sum, start_price, finish_price);
+    return (round_id, state, up_sum, down_sum, start_price, finish_price, round_direction);
 }

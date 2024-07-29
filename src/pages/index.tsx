@@ -1,58 +1,46 @@
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
-import { button as buttonStyles } from "@nextui-org/theme";
-
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
+import { useQuery } from "@tanstack/react-query";
+import Chart from "@/components/chart";
+import Rounds from "@/components/Rounds";
 
 export default function IndexPage() {
+  const { data: contracts, isInitialLoading: isContractsInitialLoading } = useQuery({
+    queryKey: ["contracts"],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/contracts')
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      return response.json()
+    },
+    refetchInterval: 3000
+  });
+
+  const renderChart = () => {
+    console.log("RENDER chart")
+
+    return (
+      <Chart />
+    )
+  }
+
+  const renderCards = () => {
+    return (
+      <Rounds
+        contracts={contracts}
+        loading={isContractsInitialLoading}
+      />
+    )
+  }
+
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="inline-block max-w-lg text-center justify-center">
-          <h1 className={title()}>Make&nbsp;</h1>
-          <h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
-          <br />
-          <h1 className={title()}>
-            websites regardless of your design experience.
-          </h1>
-          <h4 className={subtitle({ class: "mt-4" })}>
-            Beautiful, fast and modern React UI library.
-          </h4>
-        </div>
-
-        <div className="flex gap-3">
-          <Link
-            isExternal
-            className={buttonStyles({
-              color: "primary",
-              radius: "full",
-              variant: "shadow",
-            })}
-            href={siteConfig.links.docs}
-          >
-            Documentation
-          </Link>
-          <Link
-            isExternal
-            className={buttonStyles({ variant: "bordered", radius: "full" })}
-            href={siteConfig.links.github}
-          >
-            <GithubIcon size={20} />
-            GitHub
-          </Link>
-        </div>
-
-        <div className="mt-8">
-          <Snippet hideCopyButton hideSymbol variant="bordered">
-            <span>
-              Get started by editing{" "}
-              <Code color="primary">pages/index.tsx</Code>
-            </span>
-          </Snippet>
+      <section className="flex flex-col items-center justify-center gap-4">
+        <div className="w-full flex flex-col gap-1">
+          {renderCards()}
+          {renderChart()}
         </div>
       </section>
     </DefaultLayout>
