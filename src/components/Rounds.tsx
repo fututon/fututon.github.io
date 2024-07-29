@@ -62,7 +62,7 @@ export default function Rounds({ contracts }) {
         draggable={true}
         partialVisible={true}
         // centerMode={true}
-        focusOnSelect={true}
+        // focusOnSelect={true}
       >
         {contracts.map(renderCard)}
       </Carousel>

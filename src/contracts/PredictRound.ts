@@ -99,8 +99,9 @@ export default class PredictRound implements Contract {
     const address = result.stack.readAddress(); // AVOID RERENDER
     const betAmount = result.stack.readNumber();
     const betDirection = result.stack.readNumber();
+    const isClaimed = result.stack.readBoolean()
 
-    return { flag, betAmount, betDirection }
+    return { flag, betAmount, betDirection, isClaimed }
   }
 
   async getRoundInfo(provider: ContractProvider) {

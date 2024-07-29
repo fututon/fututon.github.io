@@ -26,9 +26,9 @@ console.log(WebApp)
 window['w'] = WebApp
 
 
-import eruda from 'eruda';
-
-eruda.init()
+// import eruda from 'eruda';
+//
+// eruda.init()
 
 //
 import { SDKProvider } from '@telegram-apps/sdk-react';

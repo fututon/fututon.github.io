@@ -204,7 +204,7 @@ export default function RoundCard({ contractAddress }) {
             <p className="text-tiny uppercase font-bold">Locked price: {startPrice} TON</p>
             <p className="uppercase font-bold">Prize pool: {prizeSum} TON</p>
 
-            {isWon &&
+            {isWon && !playerInfo.isClaimed &&
               <Button
                 color="primary"
                 isDisabled={!connected}
@@ -213,6 +213,24 @@ export default function RoundCard({ contractAddress }) {
                 }}
               >
                 Withdraw prize
+              </Button>
+            }
+
+            {isWon && playerInfo.isClaimed &&
+              <Button
+                color="success"
+                isDisabled={true}
+              >
+                Claimed
+              </Button>
+            }
+
+            {!isWon &&
+              <Button
+                color="primary"
+                isDisabled={true}
+              >
+                Not won
               </Button>
             }
           </div>
