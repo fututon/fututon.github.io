@@ -8,6 +8,9 @@ import {fromNano, toNano} from "ton-core";
 import {useTonPrice} from "@/hooks/useTonPrice";
 
 export default function RoundCard({ contractAddress }) {
+  console.log("ROUND", contractAddress)
+
+
   const { connected } = useTonConnect();
   const { address, roundInfo, playerInfo, sendPlaceUp, sendPlaceDown, sendWithdrawWinning } = usePredictRoundContract(contractAddress);
   const [bet, setBet] = useState(0);
@@ -15,12 +18,30 @@ export default function RoundCard({ contractAddress }) {
 
   const prizeSum = roundInfo ? fromNano(roundInfo.upSum + roundInfo.downSum) : '';
 
+  const renderPlayerBet = (direction) => {
+    if (!playerInfo) return null
+    if (playerInfo.betDirection !== direction) return null
+
+    let amount = fromNano(playerInfo.betAmount)
+
+    return (
+      <div className="bg-primary-50 p-1 rounded-md">
+        Yours {amount} TON
+      </div>
+    )
+  }
+
   const renderUpDirection = () => {
     const upSum = roundInfo.upSum ? fromNano(roundInfo.upSum) : 0
-    let klass = "border-2 w-[80%] text-center p-2 rounded-t-xl border-b-0 text-success"
+    let klass = "border-2 w-[80%] text-center p-3 rounded-t-xl border-b-0 text-success relative"
     klass += roundInfo.roundDirection == 1 ? ' text-white bg-success' : ''
     return (
       <div className={klass}>
+        <div className="absolute top-0 left-[-20px] text-sm">
+          {renderPlayerBet(1)}
+        </div>
+
+
         <div>UP</div>
         <div>{upSum}</div>
       </div>
@@ -29,10 +50,14 @@ export default function RoundCard({ contractAddress }) {
 
   const renderDownDirection = () => {
     const downSum = roundInfo.downSum ? fromNano(roundInfo.downSum) : 0
-    let klass = "border-2 w-[80%] text-center p-2 rounded-b-xl border-t-0 text-danger"
+    let klass = "border-2 w-[80%] text-center p-3 rounded-b-xl border-t-0 text-danger relative"
     klass += roundInfo.roundDirection == 2 ? ' text-white bg-danger' : ''
     return (
       <div className={klass}>
+        <div className="absolute bottom-0 left-[-20px] text-sm">
+          {renderPlayerBet(2)}
+        </div>
+
         <div>{downSum}</div>
         <div>DOWN</div>
       </div>
@@ -127,6 +152,7 @@ export default function RoundCard({ contractAddress }) {
 
   const renderStartedRound = () => {
     const startPrice = fromNano(roundInfo.startPrice);
+    const priceKlass = startPrice < price ? 'text-success font-bold' : 'text-danger font-bold';
 
     return (
       <Card
@@ -140,10 +166,11 @@ export default function RoundCard({ contractAddress }) {
           {renderUpDirection()}
 
           <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
-            <p className="text-tiny uppercase font-bold">Prize pool: {prizeSum} TON</p>
+            <p className="text-tiny uppercase">Current price:</p>
+            <p className={priceKlass}>{price} TON</p>
 
             <p className="text-tiny uppercase font-bold">Locked price: {startPrice} TON</p>
-            <p className="text-tiny uppercase font-bold">Current price price: {price} TON</p>
+            <p className="uppercase font-bold">Prize pool: {prizeSum} TON</p>
           </div>
 
           {renderDownDirection()}
@@ -155,6 +182,9 @@ export default function RoundCard({ contractAddress }) {
   const renderFinishedRound = () => {
     const startPrice = fromNano(roundInfo.startPrice);
     const finishPrice = fromNano(roundInfo.finishPrice);
+
+    const isWon = playerInfo && roundInfo && roundInfo.roundDirection === playerInfo.betDirection;
+    const priceKlass = roundInfo.roundDirection === 1 ? 'text-success font-bold' : 'text-danger font-bold';
 
     return (
       <Card
@@ -168,20 +198,23 @@ export default function RoundCard({ contractAddress }) {
           {renderUpDirection()}
 
           <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
-            <p className="text-tiny uppercase font-bold">Prize pool: {prizeSum} TON</p>
+            <p className="text-tiny uppercase">Finish price:</p>
+            <p className={priceKlass}>{finishPrice} TON</p>
 
             <p className="text-tiny uppercase font-bold">Locked price: {startPrice} TON</p>
-            <p className="text-tiny uppercase font-bold">Finish price price: {finishPrice} TON</p>
+            <p className="uppercase font-bold">Prize pool: {prizeSum} TON</p>
 
-            <Button
-              color="primary"
-              isDisabled={!connected}
-              onClick={() => {
-                sendWithdrawWinning();
-              }}
-            >
-              Withdraw prize
-            </Button>
+            {isWon &&
+              <Button
+                color="primary"
+                isDisabled={!connected}
+                onClick={() => {
+                  sendWithdrawWinning();
+                }}
+              >
+                Withdraw prize
+              </Button>
+            }
           </div>
 
           {renderDownDirection()}
@@ -189,6 +222,8 @@ export default function RoundCard({ contractAddress }) {
       </Card>
     )
   }
+
+  console.log('roundInfo', roundInfo)
 
   if (roundInfo) {
     const roundState = roundInfo.roundState;
