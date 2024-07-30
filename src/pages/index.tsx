@@ -9,7 +9,12 @@ export default function IndexPage() {
     queryKey: ["contracts"],
     queryFn: async () => {
       const url = import.meta.env.DEV ? 'http://localhost:5000/contracts' : 'http://82.202.198.172:8964/contracts'
-      const response = await fetch(url)
+      const response = await fetch(url).catch(error => {
+        console.log("ERRR")
+        console.log(error)
+      })
+
+
 
       if (!response.ok) {
         throw new Error('Network response was not ok')
