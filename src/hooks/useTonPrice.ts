@@ -1,9 +1,11 @@
-import {useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export function useTonPrice() {
 
   const getLastPrice = async () => {
-    let response = await fetch("http://localhost:5000/api/ticker").then(response => response.json())
+    const url = import.meta.env.DEV ? "http://localhost:5000/api/ticker" : 'http://82.202.198.172:8964/api/ticker'
+    let response = await fetch(url)
+      .then(response => response.json())
 
     if (response.retMsg !== "OK") {
       return null
@@ -22,5 +24,5 @@ export function useTonPrice() {
 
   return {
     price: data
-  };
+  }
 }
