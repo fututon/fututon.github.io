@@ -12,6 +12,13 @@ export default function IndexPage() {
       const response = await fetch(url).catch(error => {
         console.log("ERRR")
         console.log(error)
+
+        console.warn(err);
+        return new Response(JSON.stringify({
+          code: 400,
+          message: 'Stupid network Error'
+        }));
+
       })
 
 
