@@ -8,7 +8,7 @@ export default function IndexPage() {
   const { data: contracts, isInitialLoading: isContractsInitialLoading } = useQuery({
     queryKey: ["contracts"],
     queryFn: async () => {
-      const url = import.meta.env.DEV ? 'http://localhost:5000/contracts' : 'http://82.202.198.172:8964/contracts'
+      const url = import.meta.env.DEV ? 'http://localhost:5000/contracts' : 'https://flowbuilder.ru/contracts'
       const response = await fetch(url).catch(error => {
         console.log("ERRR")
         console.log(error)
@@ -17,10 +17,7 @@ export default function IndexPage() {
           code: 400,
           message: 'Stupid network Error'
         }));
-
       })
-
-
 
       if (!response.ok) {
         throw new Error('Network response was not ok')
