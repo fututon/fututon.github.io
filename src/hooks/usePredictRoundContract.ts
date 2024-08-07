@@ -5,7 +5,7 @@ import { useTonConnect } from "./useTonConnect";
 import { Address, OpenedContract, toNano, fromNano } from "ton-core";
 import { useQuery } from "@tanstack/react-query";
 import { CHAIN } from "@tonconnect/protocol";
-import {useTonAddress} from "@tonconnect/ui-react";
+import { useTonAddress } from "@tonconnect/ui-react";
 
 export function usePredictRoundContract(contractAddress: string) {
   const { client } = useTonClient();
@@ -24,8 +24,10 @@ export function usePredictRoundContract(contractAddress: string) {
       if (!contract) return null;
       return await contract!.getRoundInfo();
     },
-    refetchInterval: 3000
+    refetchInterval: 2000 + Math.random() * 1000
   });
+
+  console.log(2000 + Math.random() * 1000)
 
   const { data: playerInfoValue } = useQuery({
     queryKey: ["player_info " + contractAddress],
@@ -34,7 +36,7 @@ export function usePredictRoundContract(contractAddress: string) {
       if (!address) return null;
       return await contract!.getPlayerInfo(Address.parse(address));
     },
-    refetchInterval: 3000
+    refetchInterval: 2000 + Math.random() * 1000
   });
 
   return {
@@ -42,12 +44,12 @@ export function usePredictRoundContract(contractAddress: string) {
     roundInfo: roundInfoValue,
     playerInfo: playerInfoValue,
 
-    sendPlaceUp: (value) => {
+    sendPlaceUp: (value: number) => {
       return contract?.sendPlaceUp(sender, {
         value: toNano(value.toString())
       });
     },
-    sendPlaceDown: (value) => {
+    sendPlaceDown: (value: number) => {
       return contract?.sendPlaceDown(sender, {
         value: toNano(value.toString())
       });

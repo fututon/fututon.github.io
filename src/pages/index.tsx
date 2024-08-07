@@ -59,7 +59,7 @@ export default function IndexPage() {
   const renderCards = () => {
     return (
       <Rounds
-        contracts={contracts}
+        roundsData={contracts}
         loading={isContractsInitialLoading}
       />
     )
@@ -74,12 +74,11 @@ export default function IndexPage() {
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4">
-        <div className="w-full flex flex-col gap-1">
-          {renderCountdown()}
-
+        {/*<div className="w-full flex flex-col gap-1">*/}
+        {/*  {renderCountdown()}*/}
           {renderCards()}
           {renderChart()}
-        </div>
+        {/*</div>*/}
       </section>
     </DefaultLayout>
   );

@@ -112,6 +112,21 @@ global cell bets;
     return (flag, address, bet_amount, bet_direction, is_claimed);
 }
 
+int calc_prize(int bet_amount, int bet_direction) impure {
+    int prize_sum = (up_sum + down_sum); ;; TODO: комиссия
+    int winning_prize = 0;
+    int precision = 1000000000;
+
+    if (bet_direction == direction::up) {
+        winning_prize = bet_amount * precision / up_sum * prize_sum / precision;
+        ;; winning_prize =  muldiv(muldiv(bet_amount, precision, up_sum), prize_sum, precision);
+    } else {
+        winning_prize = bet_amount * precision / down_sum * prize_sum / precision;
+    }
+
+    return winning_prize;
+}
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     ~strdump("recv_internal!!!");
 
@@ -163,6 +178,8 @@ global cell bets;
         round_direction = 0;
         comission = 10;
         bets = new_dict();
+
+        msgs::send_empty(0, sender_address, CARRY_REMAINING_GAS);
 
         save_data();
         return ();
@@ -271,29 +288,7 @@ global cell bets;
         throw_unless(302, round_direction == bet_direction);
         throw_if(303, is_claimed);
 
-        int prize_sum = (up_sum + down_sum); ;; TODO: комиссия
-
-        ~strdump("prize sum");
-        ~dump(prize_sum);
-
-
-        ;; TOOD: неправильный рассчет
-
-
-        int winning_prize = 0;
-        int precision = 1000000000;
-        if (bet_direction == direction::up) {
-            ~strdump("UP WIN");
-            ~dump(bet_amount);
-            ~dump(up_sum);
-            ~dump(prize_sum);
-            ~strdump("--");
-            winning_prize = bet_amount * precision / up_sum * prize_sum / precision;
-            ;; winning_prize =  muldiv(muldiv(bet_amount, precision, up_sum), prize_sum, precision);
-        } else {
-            ~strdump("DOWN WIN");
-            winning_prize = bet_amount * precision / down_sum * prize_sum / precision;
-        }
+        int winning_prize = calc_prize(bet_amount, bet_direction);
 
         ~strdump("winning_prize");
         ~dump(winning_prize);
@@ -340,16 +335,12 @@ global cell bets;
 
         finish_price = in_msg_body~load_coins();
 
-        ~dump(finish_price);
-
         ;; TODO: если цена одинаковая то чо?
         if (start_price < finish_price) {
             round_direction = direction::up;
         } else {
             round_direction = direction::down;
         }
-
-        ~dump(round_direction);
 
         state = state::round_finished;
 

@@ -1,24 +1,28 @@
 import { useTonConnect } from "@/hooks/useTonConnect";
 import { usePredictRoundContract } from "@/hooks/usePredictRoundContract.ts";
-import {Button} from "@nextui-org/button";
-import {Input} from "@nextui-org/input";
+import {Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
 import { useState } from "react";
-import {Card, CardBody, CardHeader, Divider} from "@nextui-org/react";
-import {fromNano, toNano} from "ton-core";
-import {useTonPrice} from "@/hooks/useTonPrice";
+import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
+import { fromNano, toNano } from "ton-core";
+import { useTonPrice } from "@/hooks/useTonPrice";
+import CountdownTimer from "@/components/CountdownTimer";
 
-export default function RoundCard({ contractAddress }) {
-  console.log("ROUND", contractAddress)
+type RoundCardProps = {
+  contractAddress: string,
+  nextAt: number
+}
 
+export default function RoundCard({ contractAddress, status, startRoundAt, finishRoundAt }) {
+  console.log("ROUND", contractAddress, startRoundAt, finishRoundAt)
 
   const { connected } = useTonConnect();
-  const { address, roundInfo, playerInfo, sendPlaceUp, sendPlaceDown, sendWithdrawWinning } = usePredictRoundContract(contractAddress);
+  const { roundInfo, playerInfo, sendPlaceUp, sendPlaceDown, sendWithdrawWinning } = usePredictRoundContract(contractAddress);
   const [bet, setBet] = useState(0);
   const { price } = useTonPrice();
-
   const prizeSum = roundInfo ? fromNano(roundInfo.upSum + roundInfo.downSum) : '';
 
-  const renderPlayerBet = (direction) => {
+  const renderPlayerBet = (direction: number) => {
     if (!playerInfo) return null
     if (playerInfo.betDirection !== direction) return null
 
@@ -85,12 +89,38 @@ export default function RoundCard({ contractAddress }) {
   }
 
   const renderStartedBetting = () => {
+    if (new Date() > new Date(startRoundAt)) {
+      return (
+        <Card
+          fullWidth={true}
+        >
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Betting</h4>
+          </CardHeader>
+          <Divider/>
+          <CardBody className="overflow-visible py-2 flex flex-col items-center">
+            {renderUpDirection()}
+
+            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+              <p className="text-tiny uppercase font-bold">
+                STARTING
+              </p>
+            </div>
+
+            {renderDownDirection()}
+          </CardBody>
+        </Card>
+      )
+    }
+
+    let hasBet = playerInfo && playerInfo.betDirection > 0
+
     return (
       <Card
         fullWidth={true}
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-          <h4 className="font-bold text-large">Betting</h4>
+          <h4 className="font-bold text-large">Betting <CountdownTimer targetDate={new Date(startRoundAt)} /></h4>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -99,27 +129,31 @@ export default function RoundCard({ contractAddress }) {
           <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
             <p className="text-tiny uppercase font-bold">Prize pool: {prizeSum} TON</p>
 
-            <Input type="number" label="TON" onValueChange={v => setBet(Number.parseFloat(v))} />
+            {!hasBet &&
+              <>
+                <Input type="number" label="TON" onValueChange={v => setBet(Number.parseFloat(v))}/>
 
-            <Button
-              color="success"
-              isDisabled={!connected || bet <= 0}
-              onClick={() => {
-                sendPlaceUp(bet);
-              }}
-            >
-              UP
-            </Button>
+                <Button
+                  color="success"
+                  isDisabled={!connected || bet <= 0}
+                  onClick={() => {
+                    sendPlaceUp(bet);
+                  }}
+                >
+                  UP
+                </Button>
 
-            <Button
-              color="danger"
-              isDisabled={!connected || bet <= 0}
-              onClick={() => {
-                sendPlaceDown(bet);
-              }}
-            >
-              DOWN
-            </Button>
+                <Button
+                  color="danger"
+                  isDisabled={!connected || bet <= 0}
+                  onClick={() => {
+                    sendPlaceDown(bet);
+                  }}
+                >
+                  DOWN
+                </Button>
+              </>
+            }
           </div>
 
           {renderDownDirection()}
@@ -154,12 +188,36 @@ export default function RoundCard({ contractAddress }) {
     const startPrice = fromNano(roundInfo.startPrice);
     const priceKlass = Number.parseFloat(startPrice) < price ? 'text-success font-bold' : 'text-danger font-bold';
 
+    if (new Date() > new Date(finishRoundAt)) {
+      return (
+        <Card
+          fullWidth={true}
+        >
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Started</h4>
+          </CardHeader>
+          <Divider/>
+          <CardBody className="overflow-visible py-2 flex flex-col items-center">
+            {renderUpDirection()}
+
+            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+              <p className="text-tiny uppercase font-bold">
+                FINISHING
+              </p>
+            </div>
+
+            {renderDownDirection()}
+          </CardBody>
+        </Card>
+      )
+    }
+
     return (
       <Card
         fullWidth={true}
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-          <h4 className="font-bold text-large">Started</h4>
+          <h4 className="font-bold text-large">Started <CountdownTimer targetDate={new Date(finishRoundAt)} /></h4>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -245,11 +303,12 @@ export default function RoundCard({ contractAddress }) {
 
   if (roundInfo) {
     const roundState = roundInfo.roundState;
-    if (roundState == 0) return renderNewRound();
-    if (roundState == 1) return renderStartedBetting();
-    if (roundState == 2) return renderFinishedBetting();
-    if (roundState == 3) return renderStartedRound();
-    if (roundState == 4) return renderFinishedRound();
+
+    if (status == "new") return renderNewRound();
+    if (status == "betting_started") return renderStartedBetting();
+    if (status == "betting_finished") return renderFinishedBetting();
+    if (status == "round_started") return renderStartedRound();
+    if (status == "round_finished") return renderFinishedRound();
   }
 
   return renderLoading();
