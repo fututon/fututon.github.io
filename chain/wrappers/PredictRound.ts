@@ -38,7 +38,10 @@ export const Opcodes = {
     withdraw_winning: 5,
     set_state: 6,
     start_round: 7,
-    finish_round: 8
+    finish_round: 8,
+    finish_betting: 9,
+    start_betting: 10,
+    withdraw_commission: 11
 };
 
 export class PredictRound implements Contract {
@@ -136,6 +139,17 @@ export class PredictRound implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell()
               .storeUint(Opcodes.withdraw_winning, 32)
+              .storeUint(0, 64)
+              .endCell(),
+        });
+    }
+
+    async sendWithdrawCommission(provider: ContractProvider, via: Sender) {
+        await provider.internal(via, {
+            value: toNano(0.005),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.withdraw_commission, 32)
               .storeUint(0, 64)
               .endCell(),
         });

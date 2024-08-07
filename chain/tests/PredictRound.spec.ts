@@ -15,6 +15,37 @@ describe('PredictRound', () => {
     let deployer: SandboxContract<TreasuryContract>;
     let predictRound: SandboxContract<PredictRound>;
 
+    let dupmResult = (r:any) => {
+        console.log("DUMP")
+
+        // console.log(Object.keys(r))
+        // console.log(r.result)
+
+        // console.log("transactions: ", r.transactions.length)
+
+
+        let tr = r.transactions[1]
+
+        console.log(tr.debugLogs)
+            // console.log(tr.blockchainLogs)
+        console.log(tr.vmLogs)
+
+
+        // r.transactions.forEach((tr: any) => {
+        //     // console.log(Object.keys(tr))
+
+        //     console.log(tr.debugLogs)
+        //     // console.log(tr.blockchainLogs)
+        //     console.log(tr.vmLogs)
+            
+        //     // console.log(tr.children)
+            
+        // });
+
+        console.log("END DUMP")
+
+    }
+
     beforeEach(async () => {
         blockchain = await Blockchain.create();
 
@@ -37,7 +68,7 @@ describe('PredictRound', () => {
 
         const deployResult = await predictRound.sendDeploy(deployer.getSender(), toNano('0.05'));
 
-        console.log(deployResult)
+        // console.log(deployResult)
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
@@ -48,6 +79,7 @@ describe('PredictRound', () => {
     });
 
     it('should deploy', async () => {
+        console.log('asdasd')
         // the check is done inside beforeEach
         // blockchain and predictRound are ready to use
     });
@@ -74,7 +106,7 @@ describe('PredictRound', () => {
                 value: toNano(increaseBy),
             });
 
-            console.log(increaseResult)
+            // console.log(increaseResult)
 
             // expect(increaseResult.transactions).toHaveTransaction({
             //     from: increaser.address,
@@ -99,26 +131,31 @@ describe('PredictRound', () => {
     });
 
     it('lol', async () => {
+
+        console.log('LOL')
+
         const wallet = await blockchain.treasury('wallet');
         const balance = await wallet.getBalance();
         console.log('Balane', balance);
 
         const result = await predictRound.sendTest(wallet.getSender());
-        console.log(result)
+        console.log(result.result)
 
 
         const owner = await predictRound.getOwner();
         console.log(owner)
+
+        expect(1).toBe(1);
     });
 
     it('withdraw winning', async () => {
         const wallet = await blockchain.treasury('wallet');
 
         const player2 = await blockchain.treasury('player2');
-        const player3 = await blockchain.treasury('player2');
+        const player3 = await blockchain.treasury('player3');
 
 
-        const balance = await wallet.getBalance();
+        let balance = await wallet.getBalance();
 
         console.log('Balane', balance);
 
@@ -131,7 +168,7 @@ describe('PredictRound', () => {
 
         // Other players
         await predictRound.sendPlaceUp(player2.getSender(), { value: toNano(3) });
-        await predictRound.sendPlaceDown(player2.getSender(), { value: toNano(3) });
+        await predictRound.sendPlaceDown(player3.getSender(), { value: toNano(3) });
 
         // Fin
 
@@ -141,24 +178,49 @@ describe('PredictRound', () => {
         console.log("startRoundResult", startRoundResult.result)
 
         const finishRoundResult = await predictRound.sendFinishRound(deployer.getSender(), { finish_price: toNano(2) });
-        console.log("finishRoundResult", finishRoundResult)
+        console.log("finishRoundResult", finishRoundResult.result)
 
 
         roundInfo = await predictRound.getRoundInfo();
         console.log(roundInfo)
 
-        const withdrawWinningResult = await predictRound.sendWithdrawWinning(wallet.getSender());
-        console.log("withdrawWinningResult", withdrawWinningResult.result)
+        let withdrawWinningResult = await predictRound.sendWithdrawWinning(wallet.getSender());
+        
+        console.log("withdrawWinningResult")
+        dupmResult(withdrawWinningResult)
 
 
-        const balanceAfter = await wallet.getBalance();
+        let balanceAfter = await wallet.getBalance();
 
         console.log('balanceBefore', fromNano(balance));
         console.log('balanceAfter', fromNano(balanceAfter));
 
+        expect(fromNano(balanceAfter)).toBe("1000000.5659648");
 
 
-        expect(1).toBe(2);
+        // Должен заврш ошибкой
+        withdrawWinningResult = await predictRound.sendWithdrawWinning(wallet.getSender());
+        dupmResult(withdrawWinningResult)
+
+
+
+
+        ///
+
+        deployer = await blockchain.treasury('deployer');
+
+        balance = await deployer.getBalance();
+
+        const withdrawCommissionResult = await predictRound.sendWithdrawCommission(deployer.getSender());
+        console.log("withdrawCommissionResult")
+        dupmResult(withdrawCommissionResult)
+
+        balanceAfter = await deployer.getBalance();
+
+        console.log('balanceBefore', fromNano(balance));
+        console.log('balanceAfter', fromNano(balanceAfter));
+
+        expect(fromNano(balanceAfter)).toBe("1000000.6670696");
 
     });
 });
