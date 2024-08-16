@@ -37,6 +37,14 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
 
   const renderUpDirection = () => {
     const upSum = roundInfo.upSum ? fromNano(roundInfo.upSum) : 0
+    const downSum = roundInfo.downSum ? fromNano(roundInfo.downSum) : 0
+    const sum = upSum + downSum
+
+    let rate = 1
+    if (upSum) {
+      rate = Math.round(sum / upSum)
+    }
+
     let klass = "border-2 w-[80%] text-center p-3 rounded-t-xl border-b-0 text-success relative"
     klass += roundInfo.roundDirection == 1 ? ' text-white bg-success' : ''
     return (
@@ -45,15 +53,22 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
           {renderPlayerBet(1)}
         </div>
 
-
         <div>UP</div>
-        <div>{upSum}</div>
+        <div>x{rate}</div>
       </div>
     )
   }
 
   const renderDownDirection = () => {
+    const upSum = roundInfo.upSum ? fromNano(roundInfo.upSum) : 0
     const downSum = roundInfo.downSum ? fromNano(roundInfo.downSum) : 0
+    const sum = upSum + downSum
+
+    let rate = 1
+    if (downSum) {
+      rate = Math.round(sum / downSum)
+    }
+
     let klass = "border-2 w-[80%] text-center p-3 rounded-b-xl border-t-0 text-danger relative"
     klass += roundInfo.roundDirection == 2 ? ' text-white bg-danger' : ''
     return (
@@ -62,7 +77,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
           {renderPlayerBet(2)}
         </div>
 
-        <div>{downSum}</div>
+        <div>x{rate}</div>
         <div>DOWN</div>
       </div>
     )

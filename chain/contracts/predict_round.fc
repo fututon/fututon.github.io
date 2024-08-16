@@ -1,5 +1,6 @@
 #include "imports/stdlib.fc";
 #include "imports/msgs.fc";
+#include "imports/bets-wallet-utils.fc";
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> (tuple, X) ~tpop (tuple t) asm "TPOP";
@@ -38,8 +39,10 @@ const err::winning_claimed = 303;
 
 global int deployed;
 global slice owner_address;
+global cell bets_wallet_code;
 global int round_id;
 global int state;
+global int marketmaker_bet_amount;
 global int up_sum;
 global int down_sum;
 global int start_price;
@@ -49,12 +52,14 @@ global int commission; ;; Комиссия в %
 global cell bets;
 
 () load_data() impure {
+    ~strdump("ELOAD DATD");
     var ds = get_data().begin_parse();
-
+    
     deployed = ds~load_uint(32);
     owner_address = ds~load_msg_addr();
     round_id = ds~load_uint(32);
     state = ds~load_uint(32);
+    marketmaker_bet_amount = ds~load_coins();
     up_sum = ds~load_coins();
     down_sum = ds~load_coins();
     start_price = ds~load_coins();
@@ -62,7 +67,9 @@ global cell bets;
     round_direction = ds~load_uint(32);
     commission = ds~load_uint(32);
     bets = ds~load_dict();
+    bets_wallet_code = ds~load_ref();
     ds.end_parse();
+    ~strdump("ELOAD DATA END");
 }
 
 () save_data() impure {
@@ -72,6 +79,7 @@ global cell bets;
             .store_slice(owner_address)
             .store_uint(round_id, 32)
             .store_uint(state,32)
+            .store_coins(marketmaker_bet_amount)
             .store_coins(up_sum)
             .store_coins(down_sum)
             .store_coins(start_price)
@@ -79,6 +87,7 @@ global cell bets;
             .store_uint(round_direction, 32)
             .store_uint(commission, 32)
             .store_dict(bets)
+            .store_ref(bets_wallet_code)
             .end_cell()
     );
 }
@@ -129,6 +138,22 @@ int calc_total_commission() impure {
     return total_commission;
 }
 
+() mint_tokens(slice to_address, cell bets_wallet_code, int amount, cell master_msg) impure {
+    cell state_init = calculate_bets_wallet_state_init(to_address, bets_wallet_code);
+    slice to_wallet_address = calculate_bets_wallet_address(state_init);
+
+    var msg = begin_cell()
+        .store_uint(SEND_MSG_BOUNCEABLE, 6)
+        .store_slice(to_wallet_address)
+        .store_coins(amount)
+        .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
+        .store_ref(state_init)
+        .store_ref(master_msg)
+        .end_cell();
+
+    send_raw_message(msg, 1);
+}
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     ~strdump("recv_internal");
 
@@ -156,8 +181,11 @@ int calc_total_commission() impure {
     ~strdump("OP CODE");
     ~dump(op);
 
+    load_data(); ;; here we populate the storage variables
+
     if (op == op::deploy) {
         ~strdump("DEPLOY");
+        ~dump(up_sum);
 
         ;; ;; Загружаем флаг деплоя
         ;; var ds = get_data().begin_parse();
@@ -168,8 +196,9 @@ int calc_total_commission() impure {
         owner_address = sender_address;
         round_id = 0;
         state = 1;
-        up_sum = 0;
-        down_sum = 0;
+        marketmaker_bet_amount = 0;
+        ;; up_sum = 0;
+        ;; down_sum = 0;
         start_price = 0;
         finish_price = 0;
         round_direction = 0;
@@ -178,11 +207,11 @@ int calc_total_commission() impure {
 
         msgs::send_empty(0, sender_address, CARRY_REMAINING_GAS);
 
-        save_data();
+        ~strdump("DEPLOY END");
+
+        ;; save_data();
         return ();
     }
-
-    load_data(); ;; here we populate the storage variables
 
     if (op == op::test) {
 
@@ -301,10 +330,15 @@ int calc_total_commission() impure {
 
         state = state::round_finished;
 
+        ;; Вывести коммиссию и маркетмейкинг
+        int total_commission = calc_total_commission();
+        int marketmaker_prize = calc_prize(marketmaker_bet_amount, round_direction);
+        int withdraw_amount = min(total_commission + marketmaker_prize, my_balance);
+        msgs::send_empty(withdraw_amount, sender_address, CARRY_REMAINING_GAS);
+
         save_data();
         return ();
     }
-
 
     if (op == op::start_betting) {
         ~strdump("START BETTING");
@@ -312,6 +346,12 @@ int calc_total_commission() impure {
         throw_unless(err::not_owner, equal_slices(owner_address, sender_address));
 
         state = state::betting_started;
+
+        ;; маркетмейкинг
+        ;; полученную сумму делим пополам и сохраняем "ставку маркетмейкера"
+        marketmaker_bet_amount = msg_value / 2;
+        up_sum = marketmaker_bet_amount;
+        down_sum = marketmaker_bet_amount;
 
         save_data();
         return ();
@@ -380,4 +420,10 @@ slice get_owner() method_id {
 (int, int, int, int, int, int, int) get_round_info() method_id {
     load_data();
     return (round_id, state, up_sum, down_sum, start_price, finish_price, round_direction);
+}
+
+slice get_wallet_address(slice owner_address) method_id {
+    load_data();
+    return calculate_user_bets_wallet_address(owner_address, bets_wallet_code);
+    
 }

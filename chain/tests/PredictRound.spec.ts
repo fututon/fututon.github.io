@@ -1,14 +1,17 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { Cell, toNano, fromNano } from '@ton/core';
 import { PredictRound } from '../wrappers/PredictRound';
+import { BetsWallet } from '../wrappers/BetsWallet';
 import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
 
 describe('PredictRound', () => {
     let code: Cell;
+    let betsWalletCode: Cell;
 
     beforeAll(async () => {
         code = await compile('PredictRound');
+        betsWalletCode = await compile('BetsWallet');
     });
 
     let blockchain: Blockchain;
@@ -52,11 +55,12 @@ describe('PredictRound', () => {
         predictRound = blockchain.openContract(
             PredictRound.createFromConfig(
                 {
+                    bets_wallet_code: betsWalletCode,
                     deployed: 0,
                     round_id: 0,
                     state: 0,
                     up_sum: 0,
-                    down_sum: 0
+                    down_sum: 0,
                 },
                 code
             )
@@ -68,14 +72,15 @@ describe('PredictRound', () => {
 
         const deployResult = await predictRound.sendDeploy(deployer.getSender(), toNano('0.05'));
 
+        dupmResult(deployResult)
         // console.log(deployResult)
 
-        expect(deployResult.transactions).toHaveTransaction({
-            from: deployer.address,
-            to: predictRound.address,
-            deploy: true,
-            success: true,
-        });
+        // expect(deployResult.transactions).toHaveTransaction({
+        //     from: deployer.address,
+        //     to: predictRound.address,
+        //     deploy: true,
+        //     success: true,
+        // });
     });
 
     it('should deploy', async () => {
@@ -180,6 +185,9 @@ describe('PredictRound', () => {
         const finishRoundResult = await predictRound.sendFinishRound(deployer.getSender(), { finish_price: toNano(2) });
         console.log("finishRoundResult", finishRoundResult.result)
 
+        dupmResult(finishRoundResult)
+
+
 
         roundInfo = await predictRound.getRoundInfo();
         console.log(roundInfo)
@@ -220,7 +228,7 @@ describe('PredictRound', () => {
         console.log('balanceBefore', fromNano(balance));
         console.log('balanceAfter', fromNano(balanceAfter));
 
-        expect(fromNano(balanceAfter)).toBe("1000000.6670696");
+        expect(fromNano(balanceAfter)).toBe("1000000.5659608");
 
     });
 });

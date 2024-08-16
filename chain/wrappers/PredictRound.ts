@@ -16,17 +16,62 @@ export type PredictRoundConfig = {
     state: number;
     up_sum: number;
     down_sum: number;
+    bets_wallet_code: Cell
 };
 
 export function predictRoundConfigToCell(config: PredictRoundConfig): Cell {
+    console.log("PDPASA", config)
+
+
+
+      // .store_ref(bets_wallet_code)
+      // .store_uint(deployed, 32)
+      // .store_slice(owner_address)
+      // .store_uint(round_id, 32)
+      // .store_uint(state,32)
+
+
+    //   ;; .store_ref(bets_wallet_code)
+    //   .store_uint(deployed, 32)
+    //   ;; .store_slice(owner_address)
+    //   .store_uint(round_id, 32)
+    //   .store_uint(state,32)
+    //   .store_coins(marketmaker_bet_amount)
+    //   .store_coins(up_sum)
+    //   .store_coins(down_sum)
+    //   .store_coins(start_price)
+    //   .store_coins(finish_price)
+    //   .store_uint(round_direction, 32)
+    //   .store_uint(commission, 32)
+    //   .store_dict(bets)
+
+
     return beginCell()
+      .storeUint(0, 32) // deployed
+      .storeAddress(Address.parse('0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j'))
+      .storeUint(Math.floor(Math.random() * 10000), 32)
+      .storeUint(1, 32) // state
+      .storeCoins(0) // marketmaker_bet_amount
+      .storeCoins(0) // up_sum
+      .storeCoins(0) // down_sum
+
+      .storeCoins(0) // start_price
+      .storeCoins(0) // finish_price
+      .storeUint(0, 32) // round_direction
+      .storeUint(10, 32) // commission
+      .storeDict(null)
+      .storeRef(config.bets_wallet_code)
+      .endCell()
+
+
+      // .storeRef(config.bets_wallet_code)
       // .storeUint(config.deployed, 32)
       // .storeAddress(Address.parse('0QCKzlvU69-kdaDaJf9r_yWUaCBZZpm3mP9yNp2oL_LRkk0j'))
       // .storeUint(config.round_id, 32)
       // .storeCoins(config.state)
       // .storeCoins(config.up_sum)
       // .storeCoins(config.down_sum)
-      .endCell();
+      // .endCell();
 }
 
 export const Opcodes = {
@@ -52,7 +97,14 @@ export class PredictRound implements Contract {
     }
 
     static createFromConfig(config: PredictRoundConfig, code: Cell, workchain = 0) {
+        console.log("ASASDS", config)
+
         const data = predictRoundConfigToCell(config);
+
+        console.log("111ASASDS", data)
+
+
+
         const init = { code, data };
         return new PredictRound(contractAddress(workchain, init), init);
     }
