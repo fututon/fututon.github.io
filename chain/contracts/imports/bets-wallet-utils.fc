@@ -1,11 +1,9 @@
 int workchain() asm "0 PUSHINT";
 
-cell pack_bets_wallet_data(int balance, slice owner_address, cell bets_wallet_code) inline {
-    ;; TODO: ЧТО ТУТ ХРАНИТЬ??
-    return  begin_cell()
-        .store_coins(balance) 
+cell pack_bets_wallet_data(slice owner_address) inline {
+    return begin_cell()
         .store_slice(owner_address)
-        .store_ref(bets_wallet_code)
+        .store_dict(new_dict())
         .end_cell();
 }
 
@@ -13,7 +11,7 @@ cell calculate_bets_wallet_state_init(slice owner_address, cell bets_wallet_code
 return begin_cell()
     .store_uint(0, 2)
     .store_dict(bets_wallet_code)
-    .store_dict(pack_bets_wallet_data(0, owner_address, bets_wallet_code))
+    .store_dict(pack_bets_wallet_data(owner_address))
     .store_uint(0, 1)
     .end_cell();
 }

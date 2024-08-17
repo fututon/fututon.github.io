@@ -3,17 +3,21 @@
 
 (slice, int) dict_get?(cell dict, int key_len, slice index) asm(index dict key_len) "DICTGET" "NULLSWAPIFNOT";
 
+forall X -> cell cast_to_cell (X x) asm "NOP";
+forall X -> slice cast_to_slice (X x) asm "NOP";
+forall X -> tuple cast_to_tuple (X x) asm "NOP";
+
 const op::deploy = 0;
 const op::add_round = 1;
 
-global int deployed;
-global cell rounds_addressed;
+global slice owner_address;
+global cell rounds;
 
 () load_data() impure {
     var ds = get_data().begin_parse();
 
-    deployed = ds~load_uint(32);
-    rounds_addressed = ds~load_dict();
+    owner_address = ds~load_msg_addr();
+    rounds = ds~load_dict();
 
     ds.end_parse();
 }
@@ -21,22 +25,30 @@ global cell rounds_addressed;
 () save_data() impure {
     set_data(
         begin_cell()
-            .store_uint(deployed, 32)
-            .store_dict(rounds_addressed)
+            .store_slice(owner_address)
+            .store_dict(rounds)
             .end_cell()
     );
 }
 
 () store_round_in_dict(slice sender_address) impure {
-    cell bet_cell = begin_cell()
-        .store_slice(sender_address)
-        .end_cell();
+    ;; cell bet_cell = begin_cell()
+    ;;     .store_slice(sender_address)
+    ;;     .end_cell();
 
-    rounds_addressed~dict_set(256, sender_address, bet_cell.begin_parse());
+    (int key, slice val, int flag) = rounds.udict_get_min?(256);
+
+    if (flag) {
+        key = key + 1;
+    } else {
+        key = 0;
+    }
+
+    rounds~udict_set(256, key, sender_address);
 }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-    ~strdump("recv_internal");
+    ~strdump("recv_internal BETS WALLET");
 
     if (in_msg_body.slice_empty?()) { ;; ignore all empty messages
         ~strdump("EMPTY BODY");
@@ -56,30 +68,14 @@ global cell rounds_addressed;
     slice sender_address = cs~load_msg_addr();
     int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
     int query_id = in_msg_body~load_uint(64); ;; also by convention, the next 64 bits contain the "query id", although this is not always the case
+    
+    ~strdump("LOAD DATA");
+    load_data(); ;; here we populate the storage variables
 
     ;; MESSAGES
 
     ~strdump("OP CODE");
-    ~dump(op);
-
-    if (op == op::deploy) {
-        ~strdump("DEPLOY");
-
-        ;; ;; Загружаем флаг деплоя
-        ;; var ds = get_data().begin_parse();
-        ;; deployed = ds~load_uint(32);
-        ;; throw_if(100, deployed);
-        ;;
-        deployed = 1;
-        rounds_addressed = new_dict();
-
-        msgs::send_empty(0, sender_address, CARRY_REMAINING_GAS);
-
-        save_data();
-        return ();
-    }
-
-    load_data(); ;; here we populate the storage variables
+    ~dump(op);    
 
     if (op == op::add_round) {
         ~strdump("ADD ROUND");
@@ -87,6 +83,8 @@ global cell rounds_addressed;
         store_round_in_dict(sender_address);
 
         save_data();
+
+        ~strdump("ADD ROUND END");
         return ();
     }
 
@@ -97,5 +95,16 @@ global cell rounds_addressed;
 
 cell get_rounds() method_id {
     load_data();
-    return rounds_addressed;
+
+    ;; cell d = new_dict();
+    ;; d~dict_set(256, owner_address, owner_address);
+
+
+    ;; cell d1 = new_dict();
+    ;; d1~udict_set(256, 1, owner_address);
+    ;; d1~udict_set(256, 2, owner_address);
+    ;; d1~udict_set(256, 3, owner_address);
+
+
+    return rounds;
 }

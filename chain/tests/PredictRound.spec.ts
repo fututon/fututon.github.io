@@ -29,6 +29,8 @@ describe('PredictRound', () => {
 
         let tr = r.transactions[1]
 
+        console.log(Object.keys(tr))
+        console.log(tr.address)
         console.log(tr.debugLogs)
             // console.log(tr.blockchainLogs)
         console.log(tr.vmLogs)
@@ -166,6 +168,8 @@ describe('PredictRound', () => {
 
         const result = await predictRound.sendPlaceUp(wallet.getSender(), { value: toNano(1) });
         // console.log(result)
+
+        dupmResult(result)
 
         let roundInfo = await predictRound.getRoundInfo();
         console.log(roundInfo)

@@ -7,6 +7,8 @@ forall X -> (tuple, X) ~tpop (tuple t) asm "TPOP";
 
 (slice, int) dict_get?(cell dict, int key_len, slice index) asm(index dict key_len) "DICTGET" "NULLSWAPIFNOT";
 
+const int provide_address_gas_consumption = 10000000;
+
 const op::deploy = 0;
 const op::withdraw_all = 1;
 const op::place_up = 2;
@@ -29,6 +31,7 @@ const state::round_finished = 4;
 const direction::up = 1;
 const direction::down = 2;
 
+const err::already_deployed = 100;
 const err::not_owner = 101;
 const err::not_betting_started = 200;
 const err::has_bet = 201;
@@ -138,9 +141,19 @@ int calc_total_commission() impure {
     return total_commission;
 }
 
-() mint_tokens(slice to_address, cell bets_wallet_code, int amount, cell master_msg) impure {
+() mint_bet(slice to_address, cell bets_wallet_code, int amount) impure {
     cell state_init = calculate_bets_wallet_state_init(to_address, bets_wallet_code);
     slice to_wallet_address = calculate_bets_wallet_address(state_init);
+
+
+    ~strdump("to_wallet_address");
+    ~dump(to_wallet_address);
+
+
+    cell body_msg = begin_cell()
+        .store_uint(1, 32)
+        .store_uint(0, 64)
+        .end_cell();
 
     var msg = begin_cell()
         .store_uint(SEND_MSG_BOUNCEABLE, 6)
@@ -148,8 +161,11 @@ int calc_total_commission() impure {
         .store_coins(amount)
         .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
         .store_ref(state_init)
-        .store_ref(master_msg)
+        .store_ref(body_msg)
         .end_cell();
+
+
+    ~strdump("raw send");
 
     send_raw_message(msg, 1);
 }
@@ -187,29 +203,16 @@ int calc_total_commission() impure {
         ~strdump("DEPLOY");
         ~dump(up_sum);
 
-        ;; ;; Загружаем флаг деплоя
-        ;; var ds = get_data().begin_parse();
-        ;; deployed = ds~load_uint(32);
-        ;; throw_if(100, deployed);
-        ;;
+        throw_if(err::already_deployed, deployed);
+
         deployed = 1;
         owner_address = sender_address;
-        round_id = 0;
-        state = 1;
-        marketmaker_bet_amount = 0;
-        ;; up_sum = 0;
-        ;; down_sum = 0;
-        start_price = 0;
-        finish_price = 0;
-        round_direction = 0;
-        commission = 10;
-        bets = new_dict();
 
         msgs::send_empty(0, sender_address, CARRY_REMAINING_GAS);
 
         ~strdump("DEPLOY END");
 
-        ;; save_data();
+        save_data();
         return ();
     }
 
@@ -235,6 +238,8 @@ int calc_total_commission() impure {
     }
 
     if (op == op::place_up) {
+        ~strdump("PLACE UP");
+
         throw_unless(err::not_betting_started, state == state::betting_started);
 
         (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
@@ -246,11 +251,17 @@ int calc_total_commission() impure {
         up_sum += bet_amount;
         store_bet_in_dict(sender_address, bet_amount, direction::up, false);
 
+        ;; Сохрпнить
+        ~strdump("mint_bet");
+        mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
+
         save_data();
         return ();
     }
 
     if (op == op::place_down) {
+        ~strdump("PLACE DOWN");
+
         throw_unless(err::not_betting_started, state == state::betting_started);
 
         (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
@@ -259,6 +270,10 @@ int calc_total_commission() impure {
         int bet_amount = msg_value;
         down_sum += bet_amount;
         store_bet_in_dict(sender_address, bet_amount, direction::down, false);
+
+         ;; Сохрпнить
+        ~strdump("mint_bet");
+        mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
 
         save_data();
         return ();

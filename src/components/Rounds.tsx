@@ -10,23 +10,29 @@ export default function Rounds({ roundsData, loading }) {
   //
   // contracts = ["EQBpyjKt_fPj1xiW6DZtx-wTElOm5tTjVJRidGWGxX_HULs1", "EQDug4F3XdsHZreoErShryeWMNm3nZ6tBJxE46TQBQAZMO9t", "EQATR8F96n056wBKbaXw4QHiPqlQR-hivpGN3dMVTDBHwULg"]
 
-  // roundsData = [
-  //   {
-  //     contractAddress: "EQBpyjKt_fPj1xiW6DZtx-wTElOm5tTjVJRidGWGxX_HULs1",
-  //     status: "round_finished", // new, betting_started, betting_finished, round_started, round_finished
-  //     nextAt: new Date().getTime()
-  //   },
-  //   {
-  //     contractAddress: "EQDug4F3XdsHZreoErShryeWMNm3nZ6tBJxE46TQBQAZMO9t",
-  //     status: 'round_started',
-  //     nextAt: new Date().getTime()
-  //   },
-  //   {
-  //     contractAddress: "kQAjays_OI7BoEpK8w9tfKrvQGN2Q-7DmJzMsfNh3vxK7gd2",
-  //     status: 'betting_started',
-  //     nextAt: new Date().getTime()
-  //   }
-  // ]
+  roundsData = [
+    // {
+    //   contractAddress: "kQBxrAA9TRzraFU0N0hrlxabL2TQ63yxBSoUS-Pj4L8I2V5x",
+    //   status: "betting_started", // new, betting_started, betting_finished, round_started, round_finished
+    //   nextAt: new Date().getTime()
+    // },
+    // {
+    //   contractAddress: "EQAkPigEEypo2kWTfj5Y4wOQv7tMR5EmzRs2oRWr-GjU-DBY",
+    //   status: "betting_started",
+    //   nextAt: new Date().getTime()
+    // },
+    {
+      contractAddress: "EQBAI3FmdMlMKZezOrPmqMq-wlcQzrIRUdb9HsFJy09f-zUH",
+      status: "betting_started",
+      nextAt: new Date().getTime()
+    },
+
+    // {
+    //   contractAddress: "kQAjays_OI7BoEpK8w9tfKrvQGN2Q-7DmJzMsfNh3vxK7gd2",
+    //   status: 'betting_started',
+    //   nextAt: new Date().getTime()
+    // }
+  ]
   console.log("roundsData", roundsData)
 
   let carouselElement = null
