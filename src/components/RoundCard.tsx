@@ -23,8 +23,6 @@ export default function RoundCard({ contractAddress }) {
 
   console.log("roundInfo", roundInfo)
 
-
-
   const renderPlayerBet = (direction) => {
     if (!playerInfo) return null
     if (playerInfo.betDirection !== direction) return null
@@ -107,29 +105,29 @@ export default function RoundCard({ contractAddress }) {
   }
 
   const renderStartedBetting = () => {
-    if (new Date() > new Date(startRoundAt)) {
-      return (
-        <Card
-          fullWidth={true}
-        >
-          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-            <h4 className="font-bold text-large">Betting</h4>
-          </CardHeader>
-          <Divider/>
-          <CardBody className="overflow-visible py-2 flex flex-col items-center">
-            {renderUpDirection()}
-
-            <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
-              <p className="text-tiny uppercase font-bold">
-                STARTING
-              </p>
-            </div>
-
-            {renderDownDirection()}
-          </CardBody>
-        </Card>
-      )
-    }
+    // if (new Date() > new Date(startRoundAt)) {
+    //   return (
+    //     <Card
+    //       fullWidth={true}
+    //     >
+    //       <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+    //         <h4 className="font-bold text-large">Betting</h4>
+    //       </CardHeader>
+    //       <Divider/>
+    //       <CardBody className="overflow-visible py-2 flex flex-col items-center">
+    //         {renderUpDirection()}
+    //
+    //         <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
+    //           <p className="text-tiny uppercase font-bold">
+    //             STARTING
+    //           </p>
+    //         </div>
+    //
+    //         {renderDownDirection()}
+    //       </CardBody>
+    //     </Card>
+    //   )
+    // }
 
     let hasBet = playerInfo && playerInfo.betDirection > 0
 
@@ -206,29 +204,29 @@ export default function RoundCard({ contractAddress }) {
     const startPrice = fromNano(roundInfo.startPrice);
     const priceKlass = Number.parseFloat(startPrice) < price ? 'text-success font-bold' : 'text-danger font-bold';
 
-    if (new Date() > new Date(finishRoundAt)) {
-      return (
-        <Card
-          fullWidth={true}
-        >
-          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-            <h4 className="font-bold text-large">Started</h4>
-          </CardHeader>
-          <Divider/>
-          <CardBody className="overflow-visible py-2 flex flex-col items-center">
-            {renderUpDirection()}
-
-            <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
-              <p className="text-tiny uppercase font-bold">
-                FINISHING
-              </p>
-            </div>
-
-            {renderDownDirection()}
-          </CardBody>
-        </Card>
-      )
-    }
+    // if (new Date() > new Date(finishRoundAt)) {
+    {/*  return (*/}
+    {/*    <Card*/}
+    {/*      fullWidth={true}*/}
+    {/*    >*/}
+    {/*      <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">*/}
+    //         <h4 className="font-bold text-large">Started</h4>
+    //       </CardHeader>
+    //       <Divider/>
+    //       <CardBody className="overflow-visible py-2 flex flex-col items-center">
+    //         {renderUpDirection()}
+    //
+    //         <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
+    {/*          <p className="text-tiny uppercase font-bold">*/}
+    //             FINISHING
+    //           </p>
+    //         </div>
+    //
+    //         {renderDownDirection()}
+    //       </CardBody>
+    //     </Card>
+    //   )
+    // }
 
     return (
       <Card
