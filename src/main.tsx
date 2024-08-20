@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 
-import App from "./App.tsx";
+import App from "./App.jsx";
 import { Provider } from "./provider.tsx";
 import "./styles/globals.css";
 
@@ -23,7 +23,7 @@ import WebApp from '@twa-dev/sdk'
 
 console.log(WebApp)
 
-window['w'] = WebApp
+// window['w'] = WebApp
 
 
 import eruda from 'eruda';

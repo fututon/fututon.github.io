@@ -19,10 +19,13 @@ export default function MyBetsPage() {
       nextAt: new Date().getTime()
     }))
 
+    let contracts = rounds.map(i => i.toString())
+
     return (
       <Rounds
-        roundsData={roundsData}
-        loading={false}
+        contracts={contracts}
+        // roundsData={roundsData}
+        // loading={false}
       />
     )
   }

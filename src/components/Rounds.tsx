@@ -1,57 +1,31 @@
 import RoundCard from "@/components/RoundCard"
-import Carousel from "react-multi-carousel"
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+
 import {useEffect} from "react"
 import { divider } from "@nextui-org/theme"
+import {Card, CardBody, CardHeader, Divider} from "@nextui-org/react";
 
-import 'react-multi-carousel/lib/styles.css';
-
-export default function Rounds({ roundsData, loading }) {
-
-  //
-  // contracts = ["EQBpyjKt_fPj1xiW6DZtx-wTElOm5tTjVJRidGWGxX_HULs1", "EQDug4F3XdsHZreoErShryeWMNm3nZ6tBJxE46TQBQAZMO9t", "EQATR8F96n056wBKbaXw4QHiPqlQR-hivpGN3dMVTDBHwULg"]
-
-  roundsData = [
-    // {
-    //   contractAddress: "kQBxrAA9TRzraFU0N0hrlxabL2TQ63yxBSoUS-Pj4L8I2V5x",
-    //   status: "betting_started", // new, betting_started, betting_finished, round_started, round_finished
-    //   nextAt: new Date().getTime()
-    // },
-    // {
-    //   contractAddress: "EQAkPigEEypo2kWTfj5Y4wOQv7tMR5EmzRs2oRWr-GjU-DBY",
-    //   status: "betting_started",
-    //   nextAt: new Date().getTime()
-    // },
-    {
-      contractAddress: "EQBAI3FmdMlMKZezOrPmqMq-wlcQzrIRUdb9HsFJy09f-zUH",
-      status: "betting_started",
-      nextAt: new Date().getTime()
-    },
-
-    // {
-    //   contractAddress: "kQAjays_OI7BoEpK8w9tfKrvQGN2Q-7DmJzMsfNh3vxK7gd2",
-    //   status: 'betting_started',
-    //   nextAt: new Date().getTime()
-    // }
-  ]
-  console.log("roundsData", roundsData)
-
+export default function Rounds({ contracts }) {
+  // let contracts = ["EQBpyjKt_fPj1xiW6DZtx-wTElOm5tTjVJRidGWGxX_HULs1", "EQDug4F3XdsHZreoErShryeWMNm3nZ6tBJxE46TQBQAZMO9t", "EQATR8F96n056wBKbaXw4QHiPqlQR-hivpGN3dMVTDBHwULg"]
   let carouselElement = null
 
   useEffect(() => {
-    console.log("23q3", carouselElement)
     if (!carouselElement) return
-    // CarouselElement.goToSlide(contracts.length - 1)
-  }, [])
+    carouselElement.goToSlide(contracts.length - 1)
+  }, [contracts])
 
   const responsive = {
     superLargeDesktop: {
       // the naming can be any, depends on you.
       breakpoint: { max: 4000, min: 3000 },
-      items: 5
+      items: 5,
+      partialVisibilityGutter: 50
     },
     desktop: {
       breakpoint: { max: 3000, min: 1024 },
-      items: 3
+      items: 3,
+      partialVisibilityGutter: 50
     },
     tablet: {
       breakpoint: { max: 1024, min: 464 },
@@ -61,38 +35,51 @@ export default function Rounds({ roundsData, loading }) {
     mobile: {
       breakpoint: { max: 464, min: 0 },
       items: 1,
-      partialVisibilityGutter: 50
+      partialVisibilityGutter: 20
     }
   }
 
-  const renderCard = (roundData) => {
+  const renderCard = (contractAddress) => {
     return (
-      <div className="p-1" key={roundData.contractAddress}>
+      <div className="p-1" key={contractAddress}>
         <RoundCard
-          contractAddress={roundData.contractAddress}
-          status={roundData.status}
-          startRoundAt={roundData.startRoundAt}
-          finishRoundAt={roundData.finishRoundAt}
+          contractAddress={contractAddress}
         />
       </div>
     )
   }
 
-  if (!roundsData) return null
+  const renderNextRound = () => {
+    return (
+      <div className="p-1">
+        <Card
+          fullWidth={true}
+        >
+          <CardBody className="py-20 flex flex-col items-center justify-center h-full">
+            Next round soon...
+          </CardBody>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!contracts) return null
 
   return (
     <div className="min-h-[410px] w-full">
       <Carousel
         ref={(el) => (carouselElement = el)}
-        arrows={false}
+        arrows={true}
         responsive={responsive}
         swipeable={true}
         draggable={true}
         partialVisible={true}
         // centerMode={true}
+        additionalTransfrom={10}
         // focusOnSelect={true}
       >
-        {roundsData.map(renderCard)}
+        {contracts.map(renderCard)}
+        {renderNextRound()}
       </Carousel>
     </div>
   )

@@ -8,13 +8,11 @@ import { fromNano, toNano } from "ton-core";
 import { useTonPrice } from "@/hooks/useTonPrice";
 import CountdownTimer from "@/components/CountdownTimer";
 
-type RoundCardProps = {
-  contractAddress: string,
-  nextAt: number
-}
+export default function RoundCard({ contractAddress }) {
+  console.log("ROUND", contractAddress)
 
-export default function RoundCard({ contractAddress, status, startRoundAt, finishRoundAt }) {
-  console.log("ROUND", contractAddress, startRoundAt, finishRoundAt)
+  let startRoundAt = null
+  let finishRoundAt = null
 
   const { connected } = useTonConnect();
   const { roundInfo, playerInfo, sendPlaceUp, sendPlaceDown, sendWithdrawWinning } = usePredictRoundContract(contractAddress);
@@ -22,7 +20,12 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
   const { price } = useTonPrice();
   const prizeSum = roundInfo ? fromNano(roundInfo.upSum + roundInfo.downSum) : '';
 
-  const renderPlayerBet = (direction: number) => {
+
+  console.log("roundInfo", roundInfo)
+
+
+
+  const renderPlayerBet = (direction) => {
     if (!playerInfo) return null
     if (playerInfo.betDirection !== direction) return null
 
@@ -36,8 +39,8 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
   }
 
   const renderUpDirection = () => {
-    const upSum = roundInfo.upSum ? fromNano(roundInfo.upSum) : 0
-    const downSum = roundInfo.downSum ? fromNano(roundInfo.downSum) : 0
+    const upSum: number = roundInfo.upSum ? Number.parseFloat(fromNano(roundInfo.upSum)) : 0
+    const downSum: number = roundInfo.downSum ? Number.parseFloat(fromNano(roundInfo.downSum)) : 0
     const sum = upSum + downSum
 
     let rate = 1
@@ -60,8 +63,8 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
   }
 
   const renderDownDirection = () => {
-    const upSum = roundInfo.upSum ? fromNano(roundInfo.upSum) : 0
-    const downSum = roundInfo.downSum ? fromNano(roundInfo.downSum) : 0
+    const upSum = roundInfo.upSum ? parseFloat(fromNano(roundInfo.upSum)) : 0
+    const downSum = roundInfo.downSum ? parseFloat(fromNano(roundInfo.downSum)) : 0
     const sum = upSum + downSum
 
     let rate = 1
@@ -116,7 +119,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
           <CardBody className="overflow-visible py-2 flex flex-col items-center">
             {renderUpDirection()}
 
-            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+            <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
               <p className="text-tiny uppercase font-bold">
                 STARTING
               </p>
@@ -141,7 +144,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
           {renderUpDirection()}
 
-          <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+          <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
             <p className="text-tiny uppercase font-bold">Prize pool: {prizeSum} TON</p>
 
             {!hasBet &&
@@ -189,7 +192,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
           {renderUpDirection()}
 
-          <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+          <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
             <p className="text-tiny uppercase font-bold">Prize pool: {prizeSum} TON</p>
           </div>
 
@@ -215,7 +218,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
           <CardBody className="overflow-visible py-2 flex flex-col items-center">
             {renderUpDirection()}
 
-            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+            <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
               <p className="text-tiny uppercase font-bold">
                 FINISHING
               </p>
@@ -238,7 +241,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
           {renderUpDirection()}
 
-          <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+          <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
             <p className="text-tiny uppercase">Current price:</p>
             <p className={priceKlass}>{price} TON</p>
 
@@ -270,7 +273,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
           {renderUpDirection()}
 
-          <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+          <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
             <p className="text-tiny uppercase">Finish price:</p>
             <p className={priceKlass}>{finishPrice} TON</p>
 
@@ -314,16 +317,13 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
     )
   }
 
-  console.log('roundInfo', roundInfo)
-
   if (roundInfo) {
     const roundState = roundInfo.roundState;
-
-    if (status == "new") return renderNewRound();
-    if (status == "betting_started") return renderStartedBetting();
-    if (status == "betting_finished") return renderFinishedBetting();
-    if (status == "round_started") return renderStartedRound();
-    if (status == "round_finished") return renderFinishedRound();
+    if (roundState == 0) return renderNewRound();
+    if (roundState == 1) return renderStartedBetting();
+    if (roundState == 2) return renderFinishedBetting();
+    if (roundState == 3) return renderStartedRound();
+    if (roundState == 4) return renderFinishedRound();
   }
 
   return renderLoading();
