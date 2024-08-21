@@ -207,6 +207,20 @@ export class PredictRound implements Contract {
         });
     }
 
+    async sendStartBetting(provider: ContractProvider, via: Sender, opts: {
+        value: bigint;
+        queryID?: number;
+    }) {
+        await provider.internal(via, {
+            value: opts.value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+              .storeUint(Opcodes.start_betting, 32)
+              .storeUint(opts.queryID ?? 0, 64)
+              .endCell(),
+        });
+    }
+
     async sendStartRound(provider: ContractProvider, via: Sender, opts: {
         start_price: bigint;
         queryID?: number;

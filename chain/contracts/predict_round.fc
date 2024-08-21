@@ -293,7 +293,7 @@ int calc_total_commission() impure {
         ~strdump("winning_prize");
         ~dump(winning_prize);
 
-        int withdraw_amount = min(winning_prize, my_balance);
+        int withdraw_amount = min(winning_prize, my_balance - provide_address_gas_consumption);
 
         ~strdump("withdraw_amount");
         ~dump(withdraw_amount);
@@ -346,9 +346,42 @@ int calc_total_commission() impure {
         state = state::round_finished;
 
         ;; Вывести коммиссию и маркетмейкинг
+        ~strdump("BAL");
+        ~dump(my_balance);
+
+
+        ~dump(up_sum);
+        ~dump(down_sum);
+        ~dump(up_sum + down_sum);
+
+
         int total_commission = calc_total_commission();
         int marketmaker_prize = calc_prize(marketmaker_bet_amount, round_direction);
-        int withdraw_amount = min(total_commission + marketmaker_prize, my_balance);
+
+
+        ~strdump("total_commission");
+        ~dump(total_commission);
+
+        ~strdump("marketmaker_prize");
+        ~dump(marketmaker_bet_amount);
+        ~dump(marketmaker_prize);
+
+        
+
+
+
+        int withdraw_amount = min(total_commission + marketmaker_prize, my_balance - provide_address_gas_consumption);
+
+
+        ~strdump("withdraw_amount");
+        ~dump(withdraw_amount);
+        ~dump(my_balance);
+
+
+        
+
+
+
         msgs::send_empty(withdraw_amount, sender_address, CARRY_REMAINING_GAS);
 
         save_data();
@@ -390,7 +423,7 @@ int calc_total_commission() impure {
         throw_unless(err::not_owner, equal_slices(owner_address, sender_address));
 
         int total_commission = calc_total_commission();
-        int withdraw_amount = min(total_commission, my_balance);
+        int withdraw_amount = min(total_commission, my_balance - provide_address_gas_consumption);
 
         ~strdump("COMMISSION");
         ~dump(total_commission);

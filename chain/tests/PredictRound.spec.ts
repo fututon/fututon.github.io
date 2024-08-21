@@ -29,7 +29,7 @@ describe('PredictRound', () => {
 
         let tr = r.transactions[1]
 
-        console.log(Object.keys(tr))
+        // console.log(Object.keys(tr))
         console.log(tr.address)
         console.log(tr.debugLogs)
             // console.log(tr.blockchainLogs)
@@ -233,6 +233,37 @@ describe('PredictRound', () => {
         console.log('balanceAfter', fromNano(balanceAfter));
 
         expect(fromNano(balanceAfter)).toBe("1000000.5659608");
+
+    });
+
+
+    it('marketmaker winning', async () => {
+        const deployer = await blockchain.treasury('deployer');
+        const player2 = await blockchain.treasury('player2');
+        const player3 = await blockchain.treasury('player3');
+
+        let balanceStart = await deployer.getBalance();
+
+        await predictRound.sendStartBetting(deployer.getSender(), { value: toNano(0.05) });
+
+
+// Other players
+// await predictRound.sendPlaceUp(player2.getSender(), { value: toNano(3) });
+// await predictRound.sendPlaceDown(player3.getSender(), { value: toNano(3) });
+
+
+        const startRoundResult = await predictRound.sendStartRound(deployer.getSender(), { start_price: toNano(1) });
+        console.log("startRoundResult", startRoundResult.result)
+
+        const finishRoundResult = await predictRound.sendFinishRound(deployer.getSender(), { finish_price: toNano(2) });
+        console.log("finishRoundResult", finishRoundResult.result)
+
+        dupmResult(finishRoundResult)
+
+        let balanceEnd = await deployer.getBalance();
+
+        console.log(balanceStart)
+        console.log(balanceEnd)
 
     });
 });

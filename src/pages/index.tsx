@@ -35,10 +35,10 @@ export default function IndexPage() {
   }
 
   const renderCards = () => {
-    let contractsAddresses = contracts?.slice(-4).map(i => i.contractAddress)
+    let contractsData = contracts?.slice(-4) //.map(i => i.contractAddress)
     return (
       <Rounds
-        contracts={contractsAddresses}
+        contracts={contractsData}
       />
     )
   }

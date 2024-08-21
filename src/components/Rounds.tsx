@@ -39,11 +39,14 @@ export default function Rounds({ contracts }) {
     }
   }
 
-  const renderCard = (contractAddress) => {
+  const renderCard = (roundData) => {
     return (
-      <div className="p-1" key={contractAddress}>
+      <div className="p-1" key={roundData.contractAddress}>
         <RoundCard
-          contractAddress={contractAddress}
+          contractAddress={roundData.contractAddress}
+          status={roundData.status}
+          startRoundAt={roundData.startRoundAt}
+          finishRoundAt={roundData.finishRoundAt}
         />
       </div>
     )

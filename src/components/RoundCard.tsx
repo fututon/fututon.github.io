@@ -8,11 +8,8 @@ import { fromNano, toNano } from "ton-core";
 import { useTonPrice } from "@/hooks/useTonPrice";
 import CountdownTimer from "@/components/CountdownTimer";
 
-export default function RoundCard({ contractAddress }) {
-  console.log("ROUND", contractAddress)
-
-  let startRoundAt = null
-  let finishRoundAt = null
+export default function RoundCard({ contractAddress, status, startRoundAt, finishRoundAt }) {
+  console.log("ROUND", contractAddress, startRoundAt, finishRoundAt)
 
   const { connected } = useTonConnect();
   const { roundInfo, playerInfo, sendPlaceUp, sendPlaceDown, sendWithdrawWinning } = usePredictRoundContract(contractAddress);
@@ -105,29 +102,30 @@ export default function RoundCard({ contractAddress }) {
   }
 
   const renderStartedBetting = () => {
-    // if (new Date() > new Date(startRoundAt)) {
-    //   return (
-    //     <Card
-    //       fullWidth={true}
-    //     >
-    //       <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-    //         <h4 className="font-bold text-large">Betting</h4>
-    //       </CardHeader>
-    //       <Divider/>
-    //       <CardBody className="overflow-visible py-2 flex flex-col items-center">
-    //         {renderUpDirection()}
-    //
-    //         <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
-    //           <p className="text-tiny uppercase font-bold">
-    //             STARTING
-    //           </p>
-    //         </div>
-    //
-    //         {renderDownDirection()}
-    //       </CardBody>
-    //     </Card>
-    //   )
-    // }
+    if (new Date() > new Date(startRoundAt)) {
+      return (
+        <Card
+          fullWidth={true}
+        >
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Betting</h4>
+            <p>Round #{roundInfo.roundId}</p>
+          </CardHeader>
+          <Divider/>
+          <CardBody className="overflow-visible py-2 flex flex-col items-center">
+            {renderUpDirection()}
+
+            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+              <p className="text-tiny uppercase font-bold">
+                STARTING
+              </p>
+            </div>
+
+            {renderDownDirection()}
+          </CardBody>
+        </Card>
+      )
+    }
 
     let hasBet = playerInfo && playerInfo.betDirection > 0
 
@@ -137,6 +135,7 @@ export default function RoundCard({ contractAddress }) {
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
           <h4 className="font-bold text-large">Betting <CountdownTimer targetDate={new Date(startRoundAt)} /></h4>
+          <p>Round #{roundInfo.roundId}</p>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -185,6 +184,7 @@ export default function RoundCard({ contractAddress }) {
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
           <h4 className="font-bold text-large">Starting...</h4>
+          <p>Round #{roundInfo.roundId}</p>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -204,29 +204,30 @@ export default function RoundCard({ contractAddress }) {
     const startPrice = fromNano(roundInfo.startPrice);
     const priceKlass = Number.parseFloat(startPrice) < price ? 'text-success font-bold' : 'text-danger font-bold';
 
-    // if (new Date() > new Date(finishRoundAt)) {
-    {/*  return (*/}
-    {/*    <Card*/}
-    {/*      fullWidth={true}*/}
-    {/*    >*/}
-    {/*      <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">*/}
-    //         <h4 className="font-bold text-large">Started</h4>
-    //       </CardHeader>
-    //       <Divider/>
-    //       <CardBody className="overflow-visible py-2 flex flex-col items-center">
-    //         {renderUpDirection()}
-    //
-    //         <div className="flex flex-col gap-1 p-4 border-2 rounded-xl w-full h-[200px] justify-center ">
-    {/*          <p className="text-tiny uppercase font-bold">*/}
-    //             FINISHING
-    //           </p>
-    //         </div>
-    //
-    //         {renderDownDirection()}
-    //       </CardBody>
-    //     </Card>
-    //   )
-    // }
+    if (new Date() > new Date(finishRoundAt)) {
+      return (
+        <Card
+          fullWidth={true}
+        >
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Started</h4>
+            <p>Round #{roundInfo.roundId}</p>
+          </CardHeader>
+          <Divider/>
+          <CardBody className="overflow-visible py-2 flex flex-col items-center">
+            {renderUpDirection()}
+
+            <div className="flex flex-col gap-1 p-2 border-2 rounded-xl w-full h-[200px] justify-center ">
+              <p className="text-tiny uppercase font-bold">
+                FINISHING
+              </p>
+            </div>
+
+            {renderDownDirection()}
+          </CardBody>
+        </Card>
+      )
+    }
 
     return (
       <Card
@@ -234,6 +235,7 @@ export default function RoundCard({ contractAddress }) {
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
           <h4 className="font-bold text-large">Started <CountdownTimer targetDate={new Date(finishRoundAt)} /></h4>
+          <p>Round #{roundInfo.roundId}</p>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -257,6 +259,8 @@ export default function RoundCard({ contractAddress }) {
     const startPrice = fromNano(roundInfo.startPrice);
     const finishPrice = fromNano(roundInfo.finishPrice);
 
+    console.log("%^&U*IO", playerInfo, roundInfo)
+
     const isWon = playerInfo && roundInfo && roundInfo.roundDirection === playerInfo.betDirection;
     const priceKlass = roundInfo.roundDirection === 1 ? 'text-success font-bold' : 'text-danger font-bold';
 
@@ -266,6 +270,7 @@ export default function RoundCard({ contractAddress }) {
       >
         <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
           <h4 className="font-bold text-large">Finished</h4>
+          <p>Round #{roundInfo.roundId}</p>
         </CardHeader>
         <Divider/>
         <CardBody className="overflow-visible py-2 flex flex-col items-center">
@@ -317,11 +322,12 @@ export default function RoundCard({ contractAddress }) {
 
   if (roundInfo) {
     const roundState = roundInfo.roundState;
-    if (roundState == 0) return renderNewRound();
-    if (roundState == 1) return renderStartedBetting();
-    if (roundState == 2) return renderFinishedBetting();
-    if (roundState == 3) return renderStartedRound();
-    if (roundState == 4) return renderFinishedRound();
+
+    if (status == "new") return renderNewRound();
+    if (status == "betting_started") return renderStartedBetting();
+    if (status == "betting_finished") return renderFinishedBetting();
+    if (status == "round_started") return renderStartedRound();
+    if (status == "round_finished") return renderFinishedRound();
   }
 
   return renderLoading();

@@ -44,7 +44,7 @@ function Chart() {
   );
 
   return (
-    <div style={{height: "500px", width: "100%"}}>
+    <div style={{ height: "300px", width: "100%"}}>
       <div className="tradingview-widget-container" ref={container}>
         <div className="tradingview-widget-container__widget"></div>
       </div>
