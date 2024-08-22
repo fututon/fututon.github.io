@@ -40,7 +40,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
 
     let rate = 1
     if (upSum) {
-      rate = Math.round(sum / upSum)
+      rate = Math.round(sum / upSum * 100) / 100
     }
 
     let klass = "border-2 w-[80%] text-center p-3 rounded-t-xl border-b-0 text-success relative"
@@ -64,7 +64,7 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
 
     let rate = 1
     if (downSum) {
-      rate = Math.round(sum / downSum)
+      rate = Math.round(sum / downSum * 100) / 100
     }
 
     let klass = "border-2 w-[80%] text-center p-3 rounded-b-xl border-t-0 text-danger relative"
