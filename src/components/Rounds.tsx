@@ -54,7 +54,7 @@ export default function Rounds({ contracts }) {
 
   const renderNextRound = () => {
     return (
-      <div className="p-1">
+      <div className="p-1" key="next">
         <Card
           fullWidth={true}
         >
@@ -67,6 +67,9 @@ export default function Rounds({ contracts }) {
   }
 
   if (!contracts) return null
+
+  let roundsArr = contracts.map(renderCard)
+  roundsArr.push(renderNextRound())
 
   return (
     <div className="min-h-[410px] w-full">
@@ -81,8 +84,7 @@ export default function Rounds({ contracts }) {
         additionalTransfrom={10}
         // focusOnSelect={true}
       >
-        {contracts.map(renderCard)}
-        {renderNextRound()}
+        {roundsArr}
       </Carousel>
     </div>
   )
