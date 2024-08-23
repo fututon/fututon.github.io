@@ -258,9 +258,6 @@ export default function RoundCard({ contractAddress, status, startRoundAt, finis
   const renderFinishedRound = () => {
     const startPrice = fromNano(roundInfo.startPrice);
     const finishPrice = fromNano(roundInfo.finishPrice);
-
-    console.log("%^&U*IO", playerInfo, roundInfo)
-
     const isWon = playerInfo && roundInfo && roundInfo.roundDirection === playerInfo.betDirection;
     const priceKlass = roundInfo.roundDirection === 1 ? 'text-success font-bold' : 'text-danger font-bold';
 

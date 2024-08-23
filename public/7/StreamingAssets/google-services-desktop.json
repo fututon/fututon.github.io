@@ -1,0 +1,36 @@
+{
+  "project_info": {
+    "project_number": "747683100471",
+    "project_id": "idlegame-cc6ba",
+    "storage_bucket": "idlegame-cc6ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747683100471:ios:355454dcf032ba25558cb2",
+        "android_client_info": {
+          "package_name": "com.emorado.idle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747683100471-548bh0ue0dlt4vb84uj28npb0e0aand8.apps.googleusercontent.com"
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD53V-FFLwvDKYN9Z0AfoVZmmiCs2iRDA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 0
+        },
+        "appinvite_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

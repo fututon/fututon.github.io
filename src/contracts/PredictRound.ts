@@ -30,17 +30,17 @@ export default class PredictRound implements Contract {
     provider: ContractProvider,
     via: Sender,
     opts: {
-      value: bigint;
+      bet_amount: bigint;
       queryID?: number;
     }
   ) {
     await provider.internal(via, {
-      value: opts.value,
-      sendMode: SendMode.PAY_GAS_SEPARATLY,
+      value: opts.bet_amount + toNano('0.005'),
+      sendMode: SendMode.NONE,
       body: beginCell()
         .storeUint(Opcodes.place_up, 32)
-        // .storeUint(opts.queryID ?? 0, 64)
-        .storeStringTail("Place Up")
+        .storeUint(opts.queryID ?? 0, 64)
+        .storeCoins(opts.bet_amount)
         .endCell(),
     });
   }
@@ -49,17 +49,17 @@ export default class PredictRound implements Contract {
     provider: ContractProvider,
     via: Sender,
     opts: {
-      value: bigint;
+      bet_amount: bigint;
       queryID?: number;
     }
   ) {
     await provider.internal(via, {
-      value: opts.value,
-      sendMode: SendMode.PAY_GAS_SEPARATLY,
+      value: opts.bet_amount + toNano('0.005'),
+      sendMode: SendMode.NONE,
       body: beginCell()
         .storeUint(Opcodes.place_down, 32)
         .storeUint(opts.queryID ?? 0, 64)
-        .storeStringTail("Place Down")
+        .storeCoins(opts.bet_amount)
         .endCell(),
     });
   }

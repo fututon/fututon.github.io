@@ -247,13 +247,16 @@ int calc_total_commission() impure {
 
         ;; TODO: ограничение макс ставки
 
-        int bet_amount = msg_value;
+        ;; int bet_amount = msg_value;
+        int bet_amount = in_msg_body~load_coins();
+
+
         up_sum += bet_amount;
         store_bet_in_dict(sender_address, bet_amount, direction::up, false);
 
         ;; Сохрпнить
-        ~strdump("mint_bet");
-        mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
+        ;; ~strdump("mint_bet");
+        ;; mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
 
         save_data();
         return ();
@@ -267,13 +270,15 @@ int calc_total_commission() impure {
         (int flag, slice address, int bet_amount, int bet_direction, int is_claimed) = load_bet_from_dict(sender_address);
         throw_if(err::has_bet, flag); ;; Ставка сделана
 
-        int bet_amount = msg_value;
+        ;; int bet_amount = msg_value;
+        int bet_amount = in_msg_body~load_coins();
+
         down_sum += bet_amount;
         store_bet_in_dict(sender_address, bet_amount, direction::down, false);
 
          ;; Сохрпнить
-        ~strdump("mint_bet");
-        mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
+        ;; ~strdump("mint_bet");
+        ;; mint_bet(sender_address, bets_wallet_code, provide_address_gas_consumption);
 
         save_data();
         return ();
@@ -365,6 +370,7 @@ int calc_total_commission() impure {
         ~strdump("marketmaker_prize");
         ~dump(marketmaker_bet_amount);
         ~dump(marketmaker_prize);
+
 
         
 

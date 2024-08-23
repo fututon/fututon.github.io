@@ -46,12 +46,12 @@ export function usePredictRoundContract(contractAddress: string) {
 
     sendPlaceUp: (value: number) => {
       return contract?.sendPlaceUp(sender, {
-        value: toNano(value.toString())
+        bet_amount: toNano(value.toString())
       });
     },
     sendPlaceDown: (value: number) => {
       return contract?.sendPlaceDown(sender, {
-        value: toNano(value.toString())
+        bet_amount: toNano(value.toString())
       });
     },
     sendWithdrawWinning: () => {

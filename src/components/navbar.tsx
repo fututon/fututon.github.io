@@ -56,6 +56,8 @@ export const Navbar = () => {
               </Link>
             </NavbarMenuItem>
           ))}
+
+          <a href="/7/index.html">WEBGL</a>
         </div>
       </NavbarMenu>
     </NextUINavbar>
